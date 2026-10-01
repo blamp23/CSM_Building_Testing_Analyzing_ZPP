@@ -1,0 +1,54 @@
+## binaries, compiled artefacts
+*.mat
+*.pkl
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pyc
+*.pyo
+__pycache__/
+*.rds
+*.RData
+.Rhistory
+.Rproj.user/
+
+## MATLAB
+*.asv
+slprj/
+*.autosave
+
+## logs + per-run outputs
+*.log
+*.out
+*.err
+*.diary
+diary.txt
+local_preprocess.log
+overnight.log
+s*.log
+
+## result trees (regenerated; not tracked)
+results/
+loopless_fva/results/
+loopless_fva/results_matched/
+grace_v4/results/
+grace_v4/logs/
+figures/
+figs/
+tmp/
+scratch/
+
+## editor + OS
+.DS_Store
+.AppleDouble
+.LSOverride
+.vscode/
+.idea/
+*.swp
+*~
+
+## OneDrive junk
+.sync/
+.cloud/
+Icon?

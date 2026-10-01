@@ -1,0 +1,17 @@
+MAM_id,metabolite,current_coef,new_coef,net_consumed,rationale
+MAM00209c,[protein]-N6-(lipoyl)lysine,-1.0,-1.0,True,[protein]-N6-(lipoyl)lysine — prosthetic group; per-cell accumulating
+MAM01401c,biotin,-1.0,-1.0,True,biotin — carboxylase prosthetic; per-cell accumulating
+MAM01597c,CoA,-1.0,-1.0,True,CoA — coenzyme pool; per-cell needed from pantothenate
+MAM01600m,cobamide-coenzyme,-1.0,-1.0,True,cobamide-coenzyme — B12-derived prosthetic
+MAM01631m,cytochrome-C,-0.1,-0.1,True,cytochrome-C — structural protein; coef already 0.1
+MAM01803c,FADH2,-1.0,0.0,False,FADH2 — reduced redox state; never the demand (see riboflavin)
+MAM02348c,L-carnitine,-1.0,-1.0,True,"L-carnitine — small pool for FA transport, per-cell accumulating"
+MAM02553c,NADH,-1.0,0.0,False,NADH — reduced redox state; net accumulating pool is NAD+ from niacin
+MAM02555c,NADPH,-1.0,0.0,False,NADPH — reduced redox state; net accumulating pool is NADP+ from niacin
+MAM02842c,riboflavin,-1.0,-1.0,True,"riboflavin — vitamin, feeds flavin pool (FMN/FAD synthesis)"
+MAM02978c,tetrahydrobiopterin,-1.0,-1.0,True,tetrahydrobiopterin — cofactor pool
+MAM02980c,THF,-1.0,-1.0,True,THF — one-carbon carrier cofactor
+MAM03102m,ubiquinol,-1.0,0.0,False,"ubiquinol — reduced redox state; ETC turnover, not accumulating demand"
+MAM03139c,vitamin A derivatives,-0.1,-0.1,True,vitamin A derivatives — stored vitamin
+MAM03140c,vitamin D derivatives,-0.1,-0.1,True,vitamin D derivatives — stored vitamin
+MAM03143c,vitamin E derivatives,-0.1,-0.1,True,vitamin E derivatives — stored vitamin

@@ -1,0 +1,76 @@
+metabolite,MAM_id,exchange_MAR_id,in_biomass,in_pool,from_s128c,net_consumed,class,action,measured_in_105,justification
+[protein]-N6-(lipoyl)lysine,MAM00209,,False,True,False,True,1,none_no_exchange,False,protein-N6-(lipoyl)lysine — downstream of lipoate but treated as scaffold
+alanine,MAM01307,MAR09061,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+alpha-tocotrienol,MAM01330,MAR09152,False,False,False,True,1,medium_uptake,False,"alpha-tocotrienol — vitamin E form, yolk-derived, not synthesisable (manual s137)"
+apoA1,MAM01350,MAR04110,False,False,False,True,1,ysl_lipid_delivery,False,"apoA1 — YSL apolipoprotein, HDL scaffold (Fraher 2016); default bound; unmeasured (manual s137)"
+apoB100,MAM01351,MAR11987,False,False,False,True,1,ysl_lipid_delivery,False,"apoB100 — YSL apolipoprotein, VLDL/LDL scaffold (Fraher 2016); default bound; unmeasured (manual s137)"
+aquacob(III)alamin,MAM01361,MAR09269,False,False,True,True,1,keep_exchange,False,vitamin B12 (aquacob(III)alamin) — not synthesised by animals
+arginine,MAM01365,MAR09066,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+asparagine,MAM01369,MAR09062,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+aspartate,MAM01370,MAR09070,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+beta-carotene,MAM01385,MAR09276,False,False,False,True,1,medium_uptake,False,"beta-carotene — vitamin A precursor, yolk-derived, not synthesisable de novo (manual s137)"
+biotin,MAM01401,MAR09109,False,True,False,True,1,keep_exchange,False,biotin (B7)
+chylomicron,MAM01570,MAR09024,False,False,False,True,1,ysl_lipid_delivery,False,chylomicron — YSL yolk-lipid delivery (Fraher 2016); default bound; unmeasured (manual s137)
+cobamide-coenzyme,MAM01600,MAR08400,False,True,False,True,1,keep_exchange,False,"cobamide-coenzyme — B12 derivative, precursor is dietary B12"
+cysteine,MAM01628,MAR09065,True,False,False,True,1,keep_exchange,False,cysteine
+FAD,MAM01802,MAR01939,False,False,True,True,1,keep_exchange,True,measured in the metabolomics 105 (override); would be class 2 (FAD — synthesised from riboflavin via RFK+FLAD1 (retired v6 forcing = special case of this rule))
+gamma-tocotrienol,MAM01938,MAR09154,False,False,False,True,1,medium_uptake,False,"gamma-tocotrienol — vitamin E form, yolk-derived, not synthesisable (manual s137)"
+glutamate,MAM01974,MAR09071,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+glutamine,MAM01975,MAR09063,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+glycine,MAM01986,MAR09067,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+HDL,MAM02048,MAR09050,False,False,False,True,1,ysl_lipid_delivery,False,HDL — YSL yolk-lipid delivery (Fraher 2016); default bound; unmeasured (manual s137)
+histidine,MAM02125,MAR09038,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+inositol,MAM02171,MAR09361,False,False,False,True,1,medium_uptake,False,"myo-inositol reclassified class 1 (2026-09-29) after closure failure; de novo ISYNA1/IMPA route not verified in this base (producibility test pending, non-blocking); dietary requirement documented for several teleosts (NRC 2011) (manual s137)"
+isoleucine,MAM02184,MAR09039,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+L-carnitine,MAM02348,MAR09292,False,True,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+LDL,MAM02353,MAR09051,False,False,True,True,1,ysl_lipid_delivery,False,LDL — reopened to treat all lipoprotein exchanges identically (Fraher 2016 yolk lipid delivery); default bound; unmeasured (manual s137)
+leucine,MAM02360,MAR09040,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+lysine,MAM02426,MAR09041,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+methionine,MAM02471,MAR09042,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+PE-LD pool,MAM02685,MAR00656,False,False,False,True,1,keep_exchange,False,pantothenate (B5)
+phenylalanine,MAM02724,MAR09043,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+proline,MAM02770,MAR09068,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+retinol,MAM02834,MAR09147,False,False,True,True,1,keep_exchange,False,"retinol — vitamin A, dietary (yolk)"
+riboflavin,MAM02842,MAR09143,False,True,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+serine,MAM02896,MAR09069,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+tetrahydrobiopterin,MAM02978,MAR10496,False,True,False,True,1,keep_exchange,False,tetrahydrobiopterin (BH4)
+THF,MAM02980,MAR09421,False,True,False,True,1,keep_exchange,False,THF — folate-derived; dietary folate
+threonine,MAM02993,MAR09044,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+tryptophan,MAM03089,MAR09045,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+tyrosine,MAM03101,MAR09064,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+ubiquinol,MAM03102,MAR08967,False,True,False,True,1,keep_exchange,False,ubiquinol / ubiquinone — fat-soluble; keep as dietary until synthesis confirmed
+UDP-glucuronate,MAM03109,MAR09864,False,False,True,True,1,keep_exchange,True,"measured in the metabolomics 105 (override); would be class 3 (UDP-glucuronate — activated sugar, internal only)"
+valine,MAM03135,MAR09046,True,False,False,True,1,keep_exchange,True,measured in the metabolomics 105 (override)
+vitamin A derivatives,MAM03139,,False,True,False,True,1,none_no_exchange,False,vitamin A derivatives (pool)
+vitamin D derivatives,MAM03140,,False,True,False,True,1,none_no_exchange,False,vitamin D derivatives (pool) — upstream of calcidiol
+vitamin E derivatives,MAM03143,,False,True,False,True,1,none_no_exchange,False,vitamin E derivatives
+VLDL,MAM03147,MAR09049,False,False,False,True,1,ysl_lipid_delivery,False,VLDL — YSL yolk-lipid delivery (Fraher 2016); default bound; unmeasured (manual s137)
+calcidiol,MAM01415,MAR09215,False,False,True,True,2,close_exchange,False,calcidiol — CYP2R1/CYP27A1 hydroxylation of vitamin D3
+calcitriol,MAM01417,MAR11965,False,False,True,True,2,close_exchange,False,calcitriol — CYP27B1 hydroxylation of calcidiol
+cholesterol,MAM01450,MAR09285,True,False,False,True,2,close_exchange,False,cholesterol — mevalonate pathway exists; close exchange. Note: yolk is an alternate source in early embryo but modelling as synthesis is cleaner and consistent with the general rule
+CoA,MAM01597,MAR04256,False,True,False,False,2,close_exchange,False,"CoA — synthesised from pantothenate; accumulating pool per cell so pool coef stays, but exchange closes because CoA doesn't cross membranes as CoA (pantothenate uptake covers it)"
+cofactors and vitamins,MAM01602,,True,False,False,True,2,none_no_exchange,False,cofactors and vitamins (pseudo) — internal aggregation
+cytochrome-C,MAM01631,,False,True,False,True,2,none_no_exchange,False,cytochrome-C — internal
+DNA-5-methylcytosine,MAM01722,,True,False,False,True,2,none_no_exchange,False,DNA-5-methylcytosine — internal
+FADH2,MAM01803,,False,True,False,True,2,none_no_exchange,False,FADH2 — FAD redox partner
+heme,MAM02049,MAR09107,False,False,False,True,2,close_exchange,False,heme — synthesised via ALAS→heme biosynthesis pathway; close uptake (manual s137)
+lipoic acid,MAM02394,MAR09167,False,False,True,True,2,close_exchange,False,lipoic acid — LIAS synthesis from octanoyl-ACP
+NADPH,MAM02555,,False,True,False,False,2,none_no_exchange,False,NADPH
+bilirubin,MAM01396,MAR09273,False,False,True,True,3,close_exchange,False,"bilirubin — heme degradation product, boundary junk in embryo"
+bilirubin-bisglucuronoside,MAM01397,MAR09271,False,False,True,True,3,close_exchange,False,bilirubin-bisglucuronoside — phase-II excretion product
+cholesterol-ester pool,MAM01451,MAR00714,True,False,False,True,3,close_exchange,False,cholesterol-ester pool
+CL pool,MAM01589,,True,False,False,True,3,none_no_exchange,False,CL pool
+DNA,MAM01721,,True,False,False,True,3,none_no_exchange,False,DNA — internal biomass component
+haptoglobin,MAM02044,MAR04119,False,False,False,True,3,close_exchange,False,"haptoglobin — plasma protein artefact, not physiologically uptaken by embryo (manual s137)"
+hexanoyl-CoA,MAM02122,MAR10250,False,False,True,True,3,close_exchange,False,hexanoyl-CoA — internally activated from hexanoate
+inositol-1-phosphate,MAM02173,MAR10263,False,False,False,True,3,close_exchange,False,"inositol-1-phosphate — intracellular intermediate, exchange is boundary artefact (manual s137)"
+LDL remnant,MAM02352,MAR09055,False,False,True,True,3,close_exchange,False,LDL remnant
+lipid droplet,MAM02392,,True,False,False,True,3,none_no_exchange,False,lipid droplet
+NADH,MAM02553,MAR12141,False,True,False,False,3,close_exchange,False,"NADH — reduced redox state, exchange is modelling artefact (real accumulating pool is NAD+ from niacin)"
+PG-CL pool,MAM02715,MAR00658,False,False,True,True,3,close_exchange,False,PG-CL pool — phosphatidylglycerol/cardiolipin pool
+phosphatidate-LD-TAG pool,MAM02733,MAR11352,True,False,False,True,3,close_exchange,False,phosphatidate-LD-TAG pool
+PI pool,MAM02750,MAR12127,True,False,True,True,3,close_exchange,False,PI pool — assembly reaction internal; exchange shouldn't exist
+RNA,MAM02847,,True,False,False,True,3,none_no_exchange,False,RNA — internal biomass component
+SM pool,MAM02908,MAR11281,True,False,False,True,3,close_exchange,False,SM pool — sphingomyelin pool
+glycogen,MAM03161,MAR09729,True,False,False,True,3,close_exchange,False,glycogen — synthesised internally
+Glutaminyl-Histidyl-Histidine,MAM03597,MAR10554,False,False,False,True,3,close_exchange,False,"Glutaminyl-Histidyl-Histidine — tripeptide, boundary artefact; His demand covered by MAR09038 (manual s137)"
