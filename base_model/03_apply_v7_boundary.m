@@ -76,9 +76,20 @@ medium_list = { ...
 O2_EX = 'MAR09048';
 
 % ---- (a) pool edits -----------------------------------------------------
+% (a0) 2026-10-01: revert historical cytochrome-C coefficient change
+% (zebrafishGEM_v2_modcofpool.mat had MAM01631m at -0.1; Wang original is -1).
+% Narrative simplification — only ε at biomass level deflates pool demand,
+% no hand-picked cofactor coefs.
+j_pool = find(strcmp(m.rxns, 'MAR00022'));
+i_cytc = find(strcmp(m.mets, 'MAM01631m'));
+if ~isempty(j_pool) && ~isempty(i_cytc)
+    old_cytc = full(m.S(i_cytc, j_pool));
+    m.S(i_cytc, j_pool) = -1.0;
+    fprintf('(a0) MAR00022 cyto-C coef (MAM01631m): %+g -> -1 (reverted to Wang)\n', old_cytc);
+end
+
 % (a1) MAR00022 substrate zeros for reduced-redox states
 poolTbl = readtable(POOL);
-j_pool = find(strcmp(m.rxns, 'MAR00022'));
 fprintf('\n(a1) editing MAR00022 pool coefficients ...\n');
 zeroed = 0;
 for i = 1:height(poolTbl)
