@@ -374,3 +374,358 @@ cancelled. v7 models are shipped. Enzyme subsets recomputed on v7.
 PolyRound preprocessing (local, Gurobi) over all 15 cells. Sampling
 chain with unchanged settings. v5→v7 concordance column added to the
 findings table.
+
+## 11. Amendment 2026-10-03 — v7 contrast families and findings pipeline
+
+The v4 packet (§5) sampled 10 cell-pairs under the matched-floor regime
+and had a single family. v7 sampled all 15 cells (local hopsy, Fix A for
+LD_72) and runs a wider contrast panel that must be declared **before**
+any q-value is read.
+
+### 11.1 Family 1 — between-condition at each hpf (15 contrasts)
+
+For each hpf in {24, 48, 72, 96, 120}, three contrasts:
+
+- BL vs D
+- BL vs LD
+- D vs LD
+
+Tests whether lighting condition changes subsystem flux distribution
+at a given developmental stage.
+
+### 11.2 Family 2 — within-condition developmental (12 contrasts)
+
+For each condition in {BL, D, LD}, four adjacent-hpf contrasts:
+
+- 24 vs 48
+- 48 vs 72
+- 72 vs 96
+- 96 vs 120
+
+Tests whether a subsystem's flux distribution shifts between adjacent
+developmental stages within a lighting condition.
+
+### 11.3 Negative control — split-chain within each cell (15 contrasts)
+
+For each of the 15 cells, half-A (chains 1+2, 1000 samples) vs half-B
+(chains 3+4, 1000 samples) through the identical two-tier pipeline.
+
+- Reported **separately**, never pooled with Family 1 or Family 2 for
+  multiplicity correction.
+- Expected under the null: median |z| ≈ 0, 95th-pct |z| ≈ 2, zero
+  subsystems reaching q ≤ 0.10 under Family-1/2 BH if the test is
+  calibrated.
+- Used to compute an empirical FDR floor and a per-subsystem
+  neg-control-suspect flag (any split-chain |z| > 3 ⇒ flagged for Tier
+  C in Families 1/2).
+
+### 11.4 Per-row rules (unchanged from §1–§4, restated for v7)
+
+1. Row enters the family iff `carry_both >= 5`, `loop_flagged /
+   N_tier2 < 0.30`, subsystem ∉ {Exchange, Artificial, Transport}.
+2. `p_primary = p_gamma` if `N_tier2 < 15`, else `p_emp`. Gamma MLE on
+   the strictly positive W1 null draws; `p = 1 - Gamma_CDF(W1_obs;
+   shape, scale)`. Rationale: §2, re-affirmed.
+3. BH-FDR applied **globally within each family** (not per contrast).
+   `q_bh <= 0.10` is a finding.
+4. Reported alongside q_bh: `W1_obs`, `z`, `direction` (sign of mean
+   log|v| difference), `asymmetric_zeros` flag (`|zero_frac_A −
+   zero_frac_B| > 0.02`), `p_fisher_zeros`, `neg_control_suspect`.
+
+### 11.5 Robustness tiers for Family 1 and Family 2 findings
+
+Headlines come **only** from Tier A.
+
+- **Tier A** — mid-N (`N_tier2 >= 15`), zero-symmetric (no asymmetric-
+  zeros flag), not neg-control-suspect, appears in `>= 2` contrasts of
+  the same type (adjacent hpf within a condition, or two conditions at
+  one hpf) at q ≤ 0.10.
+- **Tier B** — passes family + q ≤ 0.10 but single-contrast, or small
+  N (`N_tier2 < 15` driven by p_gamma).
+- **Tier C** — passes family + q ≤ 0.10 but flagged: asymmetric zeros,
+  neg-control-suspect subsystem, or loop-dense.
+
+### 11.6 Outputs
+
+- `findings_family1.csv` — per-row Family 1 results (all 15 contrasts
+  concatenated), with q_bh, tier, concordance vs v5.
+- `findings_family2.csv` — same for Family 2 (12 contrasts).
+- `negcontrol_summary.csv` — median |z|, 95th pct |z|, count at q ≤
+  0.10 (empirical FDR estimate), per-subsystem neg-control-suspect
+  table.
+
+### 11.7 Concordance against v5
+
+Each row in `findings_family1.csv` and `findings_family2.csv` carries
+a concordance column against `reviewer_packet_v4_slim/
+s124_findings_annotated.csv` (v5): `found_in = {v5_only, v7_only,
+both}` plus `v5_z` and `v5_q` where applicable. Match key is
+`(subsystem, contrast)`.
+
+### 11.8 No stealth changes
+
+Per §6, any further modification of §11 after `findings_family1.csv`
+or `findings_family2.csv` is read must be logged here with reason and
+date and disclosed in the response letter.
+
+### 11.9 Amendment 2026-10-03 — "Pool reactions" excluded as artificial
+
+"Pool reactions" (MAR00021 biomass precursor pool, MAR00022 cofactor
+pool, and their derived pseudo-reactions in the Human-GEM / Zebrafish-
+GEM lineage) are **pseudo-reactions used to assemble lumped substrate
+pools**, not biochemical pathway members. They were not an explicit
+exclusion in §1 but belong with Exchange / Artificial / Transport
+on the same grounds: structural, not biological.
+
+Applied retroactively. First-run findings had "Pool reactions" at
+rank 10 in Family 1 (BL_120 vs D_120, N_tier2 = 5, z = 3.83,
+q = 0.045). That row is dropped from Family 1; q-values are
+re-computed by BH over the remaining 956 rows. Documented in
+`findings_family1.csv` as `subsystem_excluded = True` for provenance.
+
+### 11.10 Amendment 2026-10-03 — matched-floor resample at 96 hpf
+
+Any q <= 0.10 hit at 96 hpf involving BL_96 is flagged
+`floor_suspect = True` pending the matched-floor resample.
+
+Rationale: BL_96 is isoleucine-bound at biomass_max = 8.61, while
+D_96 = 12.3 and LD_96 = 12.7. Under Frame A, each cell's biomass
+floor is 0.9 x bmax, so BL_96's floor is ~40 % below the other two.
+The polytope shape differs by construction and this is the same
+confound that produced the fake 72 hpf coordination signal in the
+FVA diagnostic report.
+
+Matched-floor resample launched 2026-10-03 for BL_96, D_96, LD_96
+at biomass_lb = 7.749 (= 0.9 x 8.61) using s41d
+`--biomass_lb 7.749` (Frame B). Three contrasts rerun on the
+matched-floor samples: BL vs D, BL vs LD, D vs LD at 96 hpf.
+`findings_family1_matched96.csv` written next to
+`findings_family1.csv`. Any Family 1 or Family 2 claim that cites
+BL_96 is held until the matched-floor q is read.
+
+### 11.12 Amendment 2026-10-03 — median normaliser (sensitivity + rationale)
+
+§2 as originally pre-registered uses the per-representative mean across
+A and B as the normaliser for the log-ratio statistic:
+
+    mu_r = (AA_r.mean() + AB_r.mean()) / 2
+    log_ratio = log2(|v| / mu_r)   (with EPS=1e-30 added to |v|)
+
+Sampled |v| distributions are right-skewed, so the mean sits above the
+bulk. Every rep's log-ratio distribution is therefore centred somewhere
+below zero by an amount proportional to its skew, and "0" on the x
+axis no longer reads as "typical flux." The pooled subsystem
+distribution is harder to interpret, and KDEs across many reps look
+muddied.
+
+Switching the normaliser to the **median of pooled non-zero values**:
+
+    mu_r = median(|v| across A and B, where |v| >= 1e-10)
+    log_ratio = log2(|v| / mu_r)   for samples with |v| >= 1e-10;
+                                    zero samples dropped from the W1 input.
+
+Rationale: median centres every rep at zero on the pooled scale, so
+the subsystem KDE becomes an interpretable mixture and "0" reads as
+"typical flux." Both A and B share the same per-rep normaliser, so
+the W1 moves only a little; the ranking of hits should move less.
+
+**Not a free swap:** this is a §2 amendment. The findings produced
+under the mean normaliser (`findings_family1.csv`, `findings_family2.csv`)
+remain the record of what the prereg actually prescribed. The median
+rerun is reported as a **sensitivity analysis** alongside, with a
+concordance table:
+
+- Rows that are findings under **both** normalisers remain Tier A/B as
+  classified.
+- Rows that are **mean-only** or **median-only** findings are
+  downgraded to **Tier C** regardless of z or N_tier2, with a
+  `normaliser_disagree` flag.
+
+Scripts:
+- `grace_v4/scripts/two_tier_subsystem_test_fast_median.py`
+- `grace_v4/scripts/s80_findings_v7_median.py`
+- outputs → `results/stats_v7_median/`, `results/findings_v7_median/`
+- concordance → `results/findings_v7/concordance_mean_vs_median.csv`
+
+### 11.13 Amendment 2026-10-03 — SNR tiering + envelope-tracking flag
+
+Two replacements of previous §11 tiering devices.
+
+**(A) noise_floor_W1 + SNR replaces the |z| > 3 neg-control-suspect flag.**
+
+For every subsystem we now compute:
+
+    noise_floor_W1[sub] = 95th percentile of W1_obs across the 15
+                          split-chain contrasts for that subsystem.
+
+For every Family 1 / Family 2 row we add:
+
+    snr = W1_obs / noise_floor_W1[sub]
+
+This is a direct effect-size-above-method-noise ratio, instead of the
+earlier |z| > 3 proxy. SNR replaces the `neg_control_suspect` field in
+the tiering decision. Retained in the CSV as `snr` and
+`noise_floor_W1` columns. New tier rule:
+
+- **Tier A**: q ≤ 0.10 AND `snr ≥ 3` AND N_tier2 ≥ 15 AND NOT
+  asymmetric_zeros AND NOT envelope_tracking AND `n_sig_contrasts ≥ 2`
+- **Tier B**: q ≤ 0.10 AND `snr ≥ 2` AND NOT asymmetric_zeros
+  AND NOT envelope_tracking (and doesn't satisfy Tier A)
+- **Tier C**: q ≤ 0.10 AND (`snr < 2` OR asymmetric_zeros OR
+  envelope_tracking)
+
+Rationale: a hit that's only 1-1.5x above the test's own split-chain
+noise floor is not a biology claim; it's the floor itself. 3× is a
+conservative SNR threshold that holds across the n_tier2 spectrum
+(small-N and large-N subsystems both get normalised to their own
+split-chain scale).
+
+**(B) envelope_tracking flag.**
+
+For every Tier A/B row we now report:
+
+    ex_fc_summary = list of {exchange : fc_A : fc_B : fc_ratio}
+                    where exchange is any ex_rxn whose single
+                    metabolite appears in any reaction of the
+                    subsystem (either cell's extracted model).
+    envelope_tracking = True iff
+        (direction = +1 AND any fc_A / fc_B >= 2) OR
+        (direction = -1 AND any fc_A / fc_B <= 0.5)
+
+Rationale: v7 scales each measured exchange's envelope by the
+cell-specific fc multiplier. If a subsystem's reactions are tightly
+coupled to a measured exchange whose fc ratio across the two cells
+exceeds 2, the model's directional "finding" may just be the measured
+envelope difference reasserting itself through the FBA LP, not an
+emergent topology effect. Flagging as Tier C.
+
+### 11.14 Amendment 2026-10-05 — pre-reg §2 zero handling corrected
+
+§2 as written pre-registers the W1 statistic as `log₂(|v| / mu + ε)`
+with `ε = 1e-30`, so samples with `|v| = 0` enter the test at
+`log₂(ε) = −99.66`. This was carried over from an early draft and
+contradicts the v5 convention, where non-zero W1 is the method of
+record and a separate per-row Fisher-exact on zero counts (§4
+`p_fisher_zeros`) handles the zero mass as a distinct test. The
+reviewer's 2026-10-05 read correctly identified that the 18 → 63 gap
+between the §2 pre-reg run (mean + EPS-shift) and the §11.12
+sensitivity run (median + drop zeros) is almost entirely explained by
+zero handling, **not** by the mean-vs-median normaliser.
+
+Correction: non-zero W1 is the method of record. Samples with `|v|
+< 1e-10` are dropped from the W1 input and the zero fraction per
+condition is reported alongside with Fisher-exact on the 2×2 table
+(zeros vs non-zeros × A vs B). This matches v5.
+
+To separate the two effects empirically, a third pipeline is run:
+mean normaliser **with zeros dropped**. Scripts:
+
+- `grace_v4/scripts/two_tier_subsystem_test_fast_mean_dropzero.py`
+- `grace_v4/scripts/s80_findings_v7_mean_dropzero.py`
+- outputs → `results/stats_v7_mean_dropzero/`,
+  `results/findings_v7_mean_dropzero/`
+
+The three variants are:
+
+| variant | mu_r | zeros | role |
+|---|---|---|---|
+| `findings_v7/` | pooled mean of A, B | EPS-shift to −100 | pre-reg §2 as written (artifact) |
+| `findings_v7_median/` | pooled median non-zero | dropped | §11.12 sensitivity |
+| `findings_v7_mean_dropzero/` | pooled mean non-zero | dropped | **method of record (v5)** |
+
+Three-way concordance written to
+`results/findings_v7/concordance_three_way.csv`. Rows surviving as
+Tier A/B in the method-of-record pipeline are the ones carried into
+the response. The other two variants are reported as sensitivities
+with the amendment trail.
+
+### 11.15 Amendment 2026-10-05 — positive control (corrected 2026-10-05)
+
+To demonstrate pipeline sensitivity (not only specificity, which the
+split-chain negative control already shows), two in-silico
+perturbations are applied to LD_72 (clean under all §11 flags, Fix A
+applied for MVE rounding).
+
+**Target subsystem**: Steroid metabolism (not on any current hit
+list; **28 reactions in the LD_72 extracted model**, mid-sized, not
+biomass-essential — the biomass_max under raw extraction bounds is
+10.02 before and 10.02 after a full KO, so the perturbation is
+non-lethal; the fc-envelope biomass_max for LD_72 is 12.85, which is
+the number the sampler sees. The 10.02 figure is logged here only to
+document that the KO itself does not collapse growth.).
+
+**(A) Full knockout — Tier 1 (zero-fraction Fisher) validator.**
+
+- lb = ub = 0 for every reaction in Steroid metabolism in the LD_72
+  Fix A tightened model. Re-run FVA tightening on the resulting
+  model (steroid-zero may make neighbouring reactions' prior tight
+  bounds infeasible) to recover a sampling-ready polytope.
+- Resample 4 chains, 500 effective samples each, thinning 300.
+- Contrast LD_72 vs LD_72_KO_steroid through the method-of-record
+  pipeline.
+- **Correct expected signature** (the earlier draft of this
+  amendment pre-registered a Tier 2 W1 hit here, which cannot
+  happen by construction: with lb = ub = 0 every steroid rep has
+  zero flux in the KO cell, carryA = 0, so the subsystem fails the
+  §1 `carry_both ≥ 5` filter and never enters Tier 2):
+  1. **Tier 1 (p_fisher_zeros)** hit on Steroid metabolism — the
+     zero fraction in the KO cell is 1.0 vs ~0.0 in the original.
+  2. **Tier 2 (W1)** hits in metabolically connected subsystems
+     (sterol transport, cholesterol biosynthesis, bile acid
+     biosynthesis — whatever has steroid metabolism's substrates
+     or products in its reactions) via the LP redistributing flux
+     away from the newly-blocked pathway.
+  3. Steroid metabolism itself appears in the Tier 2 output with
+     `carry_both < 5 → excluded` and `p_fisher_zeros` very small —
+     documented as filtered-out, not interpreted.
+
+**(B) Knockdown — Tier 2 (W1) validator.**
+
+- For each reaction in Steroid metabolism, under LD_72 Frame A
+  bounds: run FVA to get `[FVA_min, FVA_max]`. Cap the reaction's
+  envelope to **10 % of the Frame A FVA range, preserving sign**:
+
+      new_ub = 0.1 × max(FVA_max, 0)
+      new_lb = 0.1 × min(FVA_min, 0)
+
+  (so a forward-only reaction keeps its forward direction but is
+  capped at 10 %; a reversible reaction keeps its sign but has both
+  ends tightened to 10 %). Then re-run full-model FVA tightening on
+  the knockdown model.
+- Resample 4 chains, 500 samples, thinning 300.
+- Contrast LD_72 vs LD_72_KD_steroid.
+- **Expected signature**: Steroid metabolism itself fires as a Tier
+  2 W1 hit with `snr ≫ 3`, direction = ↓, and the subsystem passes
+  the §1 filter (reactions still carry non-zero flux at 10 %
+  magnitude). Downstream subsystems may also fire but less
+  dramatically than under full KO.
+
+**(B) is the Tier 2 validator — the finding machinery most of the
+response relies on.** It runs first.
+
+Outputs:
+- `results/stats_v7_positivecontrol/LD_72_vs_LD_72_KO_steroid.csv`
+- `results/stats_v7_positivecontrol/LD_72_vs_LD_72_KD_steroid.csv`
+- `results/findings_v7_positivecontrol/report.txt` (both)
+
+If the knockdown does not fire a Tier 2 W1 hit on Steroid metabolism
+itself with snr ≫ 3, the method's Tier 2 sensitivity floor is above
+a 10× flux magnitude shift and the "few findings" reading of the
+real-data run is uninformative; both results — the method's
+sensitivity ceiling and the finding set — are reported in that case
+rather than suppressed.
+
+### 11.11 Known Frame A limitation — retinol at 48->72 across all conditions
+
+Retinol metabolism fires at q <= 0.10 at the 48->72 transition in
+BL, D, AND LD (Family 2, all Tier C, all neg-control-suspect, all
+direction = decreasing). This is the biomass-coupled retinoid subset
+(bco1-dependent in D; rbp4/stra6-dependent in BL and LD) reacting
+to Frame A's per-cell biomass floor shifting between hpf — the
+floor goes up with developmental stage because bmax goes up, and
+the retinoid subset is tightly coupled to biomass_lb through the
+vitamin A derivatives pool (MAM03139c, previously identified as
+D's biomass bottleneck in `project_vitamin_a_finding.md`). This is
+reported as a Frame A limitation in the response letter, not as a
+developmental finding.
+
