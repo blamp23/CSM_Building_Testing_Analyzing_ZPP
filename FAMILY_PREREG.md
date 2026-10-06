@@ -715,6 +715,50 @@ real-data run is uninformative; both results — the method's
 sensitivity ceiling and the finding set — are reported in that case
 rather than suppressed.
 
+### 11.16 Amendment 2026-10-05 — KD positive control redesign
+
+The §11.15(B) knockdown as originally spec'd capped each Steroid
+metabolism reaction at 10% of its Frame A FVA max. Ran, test fired
+`W1_obs = 0.015, z = -0.26, p = 0.58` on Steroid metabolism itself —
+no signal. Diagnosis after inspecting KD vs original sampled fluxes:
+
+    rxn        KD_cap_ub   mean |v| in sampled   headroom
+    MAR01644   2.80        0.049                 57× above cap
+    MAR01924   100.0       0.294                340×
+    MAR04766   69.25       8.2e-05               ~800,000×
+
+The caps are correctly applied to the mat file, but FVA_max is the
+absolute maximum each reaction *could* achieve in principle, while
+actual sampled fluxes live in the polytope *interior* far below those
+extremes. 10% of FVA_max is still enormously larger than the typical
+sampled magnitude, so the caps never bind and the KD polytope is
+functionally the same as the original.
+
+Methodological finding: for flux-sampling pipelines, FVA-max-based
+knockdown is the wrong operationalisation. The correct cap must be
+tied to the *sampled* distribution, not the polytope's absolute bounds.
+
+**(B2) Revised Tier 2 knockdown.** For each Steroid metabolism
+reaction, read the original LD_72 pooled samples and compute
+`max_abs_v = max(|v_r|)` across all 2000 samples. Set:
+
+    new_ub = +0.1 * max_abs_v   if any sampled v_r > 0 else 0
+    new_lb = -0.1 * max_abs_v   if any sampled v_r < 0 else 0
+
+This caps each steroid reaction at 10% of the maximum magnitude it
+actually achieved in sampling of the original polytope, preserving
+sign direction. Re-FVA tighten; sample 4 chains. Scripts:
+
+- `grace_v4/scripts/s82b_build_kd_percentile.py`
+- outputs → `reviewer_packet_v4_slim/v7_models_kd2_steroid/`,
+  `results/hopsy_v7_kd2_steroid/`
+
+Pre-registered expected signature (unchanged from §11.15(B)): Steroid
+metabolism itself fires at Tier 2 W1 with snr ≫ 3, direction = ↓.
+If (B2) also fails to fire, the pipeline's Tier 2 sensitivity ceiling
+is above a per-reaction 10× flux magnitude reduction — reported in
+the response alongside the finding set.
+
 ### 11.11 Known Frame A limitation — retinol at 48->72 across all conditions
 
 Retinol metabolism fires at q <= 0.10 at the 48->72 transition in
