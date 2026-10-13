@@ -773,3 +773,256 @@ D's biomass bottleneck in `project_vitamin_a_finding.md`). This is
 reported as a Frame A limitation in the response letter, not as a
 developmental finding.
 
+
+### 11.17 Amendment 2026-10-07 — Tier 0 topology × envelope decomposition under v7
+
+The v6-era "envelope ≈ 100% of parent→child gap" statement is superseded.
+Rerun under the final v7 bounds (apply_context_bounds; Frame A off; no biomass
+floor; envelope + OCR + medium + ledger only) now gives a pair-level verdict.
+
+**Scope.** `grace_v4/scripts/s150_tier0_2x2_v7.py` + `s151_tier0_fixups_bl96.py`.
+Plain FBA via Gurobi, no sampling.
+
+**Part 1 — parent vs child, per cell (15 + 15 LPs).**
+`tier0_parent_child_v7.csv` with top-3 exchange constraints by |dual × bound|
+per cell (lb = 0 irreversibility rows excluded). Parent biomass_max values
+match the previously published `tier0_biomass_max.csv` (26.6, 30.6, 31.2,
+31.2, 32.1, …) — the parent and child columns were computed under the same
+bound set. Across cells the parent is pinned on the three plasma-protein
+exchanges MAR04117 (fibrinogen), MAR04129 (plasminogen), MAR04138
+(prothrombin) with duals ≈ 1.4×10⁵ each — a consequence of the small biomass
+stoichiometric coefficient on these proteins, not biology. Child models are
+pinned on much smaller contributions (10²–10⁴), **except BL_96** whose child
+is pinned on MAR09052 (chylomicron-remnant exchange) with a dual contribution
+of 2.70×10⁵ — ≈ 50× the next-highest cell. This is the Tier 0 signature of
+BL_96's bottleneck.
+
+*Footnote on MAR10693 (added 2026-10-13, §11.20 addendum).* The gene-less
+Trp-Gly-Leu secretion exchange MAR10693 appears as the top-1 or top-2
+ub-side binder (ub = 1000, Part 1 secretion default) in 9 of 15 cells with
+|dual × bound| contributions 100–840. Setting MAR10693.ub = 0 and
+re-solving FBA under `apply_context_bounds` changes biomass_max by **0.00%
+in all 15 cells** (`grace_v4/results/v7_final_addenda/mar10693_biomax_table.csv`).
+A constraint that carries the largest dual contribution and whose removal
+changes the optimum by exactly zero is the signature of **dual degeneracy**:
+there is a family of gene-less secretion stubs (the chylomicron / VLDL
+remnant exchanges and the small-peptide exchanges that the ATP session
+enumerated as adjacent top-duals, e.g. MAR09052, MAR10709, MAR10188,
+MAR10543) that are interchangeable vents in this LP, and the solver reports
+whichever one the basis happens to land on. The underlying topology in e.g.
+LD_24 is: intracellular condensation MAR11177 (`tryptophan[c] +
+Glycylleucine[c] <=> H2O[c] + TrpGlyLeu[c]`) → H⁺-symport transporter
+MAR10935 (`H+[e] + TrpGlyLeu[e] <=> H+[c] + TrpGlyLeu[c]`) → secretion
+exchange MAR10693 (`TrpGlyLeu[e] -> ∅`). MAR10693 is one of a degenerate
+set of gene-less secretion stubs: closing any single member is absorbed by
+the others; **none affects biomass_max**. Tier 0 duals that cite these
+stubs should be read as pointers that found the degenerate set, not as
+operating costs. See the Tier 0 robustness perturbation table below for
+what biomass_max actually responds to.
+
+*Tier 0 robustness — 60 LPs (added 2026-10-13).* Because the top-ub duals
+are degenerate (above), the "nitrogen-bound" characterisation of Tier 0
+rests on a non-degenerate test: relaxing an uptake bound by 10% and asking
+whether biomass_max actually moves. For each of 15 cells × 4 measured
+exchanges (valine MAR09046, histidine MAR09038, isoleucine MAR09039,
+glucose MAR09034 as a carbon-side control), FBA under
+`apply_context_bounds`, then `lb(exchange) := 1.10 × lb(exchange)` and
+re-solve (`grace_v4/results/v7_final_addenda/tier0_robustness.csv`):
+
+- **Glucose (carbon control):** max |Δ| = 0.07 % across 15 cells; nowhere
+  near biomass-binding. Confirms the Tier 0 capacity is not carbon-limited.
+- **Valine:** max |Δ| = 0.007 %, zero in every cell. Does not bind.
+- **Histidine:** moves biomass by **4.4–5.5 %** at BL_48, D_48, D_72, LD_48,
+  LD_72 and **+2.4 %** at LD_96 — a mid-development histidine ceiling.
+- **Isoleucine:** moves biomass by **+8.2 %** at BL_96 and **+0.7 %** at
+  BL_120. BL_96 is isoleucine-bound specifically; nowhere else does
+  isoleucine bind materially.
+
+Honest Tier 0 characterisation: the capacity ceiling is nitrogen-limited,
+driven by **histidine in the hpf 48–72 window across all three conditions**
+(LD_96 included) and by **isoleucine specifically at BL_96** (consistent
+with §11.17's finding that BL_96 is a topology-dominated outlier). Valine
+is not a Tier 0 bottleneck under v7 bounds. The duals pointed to a
+degenerate secretion family and were the diagnostic entry point; the
+perturbation table is what the operating ceiling claim rests on.
+
+**Part 2 — 2×2 topology × envelope swap, per pair (15 pairs × 4 corners = 60
+LPs).** `tier0_2x2_v7.csv` reports the four corners in absolute biomass units
+plus the topology effect, envelope effect, interaction, and total diagonal
+gap. Shares are reported **only** where `|total_gap| > 5% of the smaller
+corner`; otherwise the row is marked `no material gap`. No per-hpf
+averaging. Verdict per pair:
+
+| pair | gap (hr⁻¹) | top effect | env effect | dominance |
+|---|---|---|---|---|
+| BL_24 vs {D,LD}_24, D_24 vs LD_24 | ±0.04 to 0.09 | — | — | no material gap (gap < 1%) |
+| BL_48 vs {D,LD}_48, D_48 vs LD_48 | ±0.00 to 0.09 | — | — | no material gap (gap < 1%) |
+| BL_72 vs D_72 | +1.57 | 0 | +1.59 | envelope (101%) |
+| BL_72 vs LD_72 | +0.23 | — | — | no material gap (1.8%) |
+| D_72 vs LD_72 | –1.35 | 0 | –1.37 | envelope (102%) |
+| **BL_96 vs D_96** | **–4.04** | **–3.43** | –0.61 | **topology (85%)** |
+| **BL_96 vs LD_96** | **–4.39** | **–4.06** | –0.33 | **topology (92%)** |
+| D_96 vs LD_96 | –0.36 | — | — | no material gap (2.8%) |
+| BL_120 vs D_120 | –0.11 | — | — | no material gap (0.9%) |
+| BL_120 vs LD_120 | –0.84 | –0.06 | –0.78 | envelope (93%) |
+| D_120 vs LD_120 | –0.73 | +0.04 | –0.77 | envelope (106%) |
+
+**9 of 15 pairs** carry no material gap. Of the **6 material pairs**, 4 are
+envelope-dominated (72_B vs D, 72_D vs LD, 120_BL vs LD, 120_D vs LD) and
+2 are topology-dominated (both BL_96 pairs). `n_unswappable_exchanges = 0`
+for every pair — every measured exchange appears in both members'
+extractions, so the envelope swap is clean.
+
+**Part 3 — BL_96 drill-down.** `bl96_lacking_reactions.csv` lists the
+54 transport reactions and 43 exchange/demand reactions in LD_96 but not
+BL_96, with substrate/product metabolite names and compartments. A greedy
+single-reaction add-back from BL_96's 8.535 baseline toward the 12.255
+all-173-extras ceiling (`bl96_greedy_addback.csv`) hits a plateau at **88.6%
+recovery after four meaningful picks** (steps 5–6 add < 10⁻⁵, i.e. degenerate
+alternates):
+
+| step | rxn | subsystem | biomass_max | fraction of recovery |
+|---|---|---|---|---|
+| 1 | **MAR00466** | Transport reactions | 11.737 | **86.1%** |
+| 2 | MAR11261 | Transport reactions | 11.792 | 87.5% |
+| 3 | MAR00796 | Transport reactions | 11.805 | 87.9% |
+| 4 | MAR13032 | Exchange/demand reactions | 11.832 | 88.6% |
+
+The single most-restoring reaction is **MAR00466: PS pool (phosphatidylserine)
+transport from Cytosol to Endoplasmic reticulum** — one reaction alone takes
+BL_96 from 8.5 to 11.7, 86% of the available recovery. The next picks are
+hexanoyl-carnitine import (MAR11261), sphingomyelin pool
+Cytosol → Lysosome transport (MAR00796), and TAG-chylomicron exchange
+(MAR13032). All four picks are **phospholipid / sphingolipid / fatty-acid
+trafficking reactions**. The remaining 11.4% of recovery requires a coupled
+multi-reaction add that greedy cannot find in a single step.
+
+**zFPKM check — biology vs extraction.** `bl96_greedy_gene_zfpkm.csv`
+confirms that **all six picked reactions have an empty GPR** (no gene
+assignment in Human-GEM / Wang). The direct question "are these genes low in
+BL_96 RNA-seq?" collapses: there are no genes to check. FASTCORE's decision
+to prune these transporters is therefore a **topology cascade from adjacent
+GPR-mapped reactions** that were not activated by BL_96's expression. The
+clean verdict: **the BL_96 biomass gap is extraction, not direct expression
+of these transporters**. Identifying which adjacent lipid-handling GPR-mapped
+reactions FASTCORE dropped in BL_96 (vs retained in LD_96) is the next drill
+level and belongs to a separate analysis — the Tier 0 scope stops at
+"topology-dominated, driven by PS/SM/FA trafficking reactions that FASTCORE
+pruned."
+
+**Supersession.** The v6-era "envelope ≈ 100%" claim is retracted. v7 shows
+envelope dominates at hpf 24/48/72/120 (where there is material gap), but at
+hpf 96 the gap is topology-dominated for both BL-involving pairs. This is a
+specific, reproducible finding and consistent with the subsystem-level v7
+sampling story that singled out BL_96 as the outlier cell.
+
+**Partial supersession (2026-10-12, §11.19).** The β-carotene / inositol
+free-supplied-at-`lb=-1000` bug uncovered in §11.19 inflates the apparent
+topology effect in both BL_96 pairs. Under the §11.19-corrected bounds
+(`medium_uptake_demand_bounds.csv`), the BL_96 pair-level numbers become:
+
+| pair | topology (OLD) | topology (NEW) | envelope (unchanged) |
+|---|---:|---:|---:|
+| **BL_96 vs D_96** | −3.43 | **−0.887** | −0.717 |
+| **BL_96 vs LD_96** | −4.06 | **−0.888** | +0.084 |
+
+The topology component shrinks by ≈ 75% in both pairs. The envelope component
+is unchanged. Under corrected bounds the pair-level verdict changes:
+
+- **BL_96 vs D_96** total gap ≈ −1.6, topology ≈ −0.89, envelope ≈ −0.72:
+  roughly 55/45 topology/envelope. **No longer a cleanly topology-dominated
+  pair** — the correction converts it to a mixed case.
+- **BL_96 vs LD_96** total gap ≈ −0.80, topology ≈ −0.89, envelope ≈ +0.08:
+  topology still dominates (≈ 100% of a now-smaller gap), but the gap itself
+  is five times smaller than previously reported.
+
+The PS-transporter add-back finding stands qualitatively but is restated
+against the new gap. BL_96 biomass_max is unchanged under correction
+(8.535 → 8.535); the ceiling (BL + all 173 missing reactions, 12.255) is
+unchanged; the four-pick 88.6%-recovery curve is unchanged
+(`bl96_greedy_addback.csv` reruns identically because the add-back model
+does not involve the 4 free-supplied class-1 exchanges on its restoring
+reactions). What **does** change is the interpretation of what BL_96's
+3.72-unit gap *costs on the pair contrast*: previously the pair-level gap
+to D_96 and LD_96 was ≈ −4 units of apparent topology, now it is ≈ −0.9.
+Most of the gap-of-interest in the pair comparison was β-carotene
+inflation of the non-BL_96 member of the pair, which under the old bounds
+was running a retinoid-fed biomass boost that BL_96 did not match.
+
+The pre-correction tables remain in `grace_v4/results/tier0_v7/tier0_2x2_v7.csv`;
+the corrected tables are in `grace_v4/results/atp_sweep_v7/tier0_C3_2x2_before_after.csv`.
+Any Tier A/B/C row in Vitamin A metabolism, Retinol metabolism, or
+Carotenoid-touching subsystems carries a `pre_correction_retinoid` flag
+pending the LD_72 spot-resample contrast (§11.19).
+
+Outputs:
+- `grace_v4/results/tier0_v7/tier0_parent_child_v7.csv` (15 cells, top-3 duals)
+- `grace_v4/results/tier0_v7/tier0_2x2_v7.csv` (15 pairs, 4 corners, decomposition, dominance; pre-§11.19)
+- `grace_v4/results/atp_sweep_v7/tier0_C3_2x2_before_after.csv` (post-§11.19, 15 pairs, old vs new)
+- `grace_v4/results/tier0_v7/bl96_lacking_reactions.csv` (97 missing T + E reactions, mets, compartments)
+- `grace_v4/results/tier0_v7/bl96_greedy_addback.csv` (6-step greedy, 88.6% recovery — unchanged by §11.19)
+- `grace_v4/results/tier0_v7/bl96_greedy_gene_zfpkm.csv` (no GPRs → extraction, not expression)
+
+### 11.20 Amendment 2026-10-13 — F2 matched-floor rule + resample
+
+**Rule (prospective, applied in `s85_export_tier_tables.py`):**
+An F2 Tier A row requires `p_matched_floor ≤ 0.05` when
+`max(child_biomax_A, child_biomax_B) / min(…) > 1.15`. Otherwise it is
+demoted to Tier C with `flag_reason = "floor_artifact"`.
+
+**Why.** Within-condition F2 contrasts frequently compare adjacent-hpf cells
+whose biomass_max differs enough to change polytope SHAPE independently of
+biology. Across all 15 cells, biomass_max drops from ~11 at 24 hpf to ~9.4 at
+48 hpf (the Tier 0 BL/D/LD "u-shape" minimum), then recovers to 11–13 by
+72 hpf. Any 24↔48 or 48↔72 contrast therefore crosses that 11 → 9.4 drop and
+can carry a 1.17–1.38× polytope-size ratio. In §11.10 we flagged this but
+only resampled BL_96 (F1). §11.20 extends matched-floor resampling to the F2
+axis.
+
+**Resample.** Grace job 20053143 (launched 2026-10-12 10:41 CDT, completed
+2026-10-12 ~14:50 CDT after D_72 fix via `starting_point=` patch in
+`s41d_hopsy_sample_direct.py`). 9 cells × 4 chains × 500 samples at matched
+biomass_lb per condition (BL=8.398, D=8.480, LD=8.479). CFF locally; pooled;
+six F2 contrasts via `two_tier_subsystem_test_fast_mean_dropzero.py` →
+`results/stats_v7_matched_f2/`.
+
+**Note on bounds used.** The 20053143 resample sampled from polytope caches
+built by the 2026-10-06 local preprocess, which called
+`apply_context_bounds` BEFORE §11.19 added demand bounds (2026-10-12 17:29).
+The resample therefore uses pre-§11.19 bounds — the same bounds as the main
+v7 sample set, which is the correct design: like-for-like matched-floor
+comparison, not a defect. The LD_72 spot check in §11.19 is what licenses
+the whole pre-correction sample set. The §11.20 verdict applies to
+polytope-shape confounds under the pre-§11.19 ground truth; the retinoid
+family is flagged via the new `pre_correction_retinoid` column (true iff
+subsystem ∈ {Retinol metabolism, Vitamin A metabolism, Carotenoid
+biosynthesis}).
+
+**Verdict (22 flagged F2 Tier A rows, split 10 / 12):**
+
+Surviving (10): Arachidonic acid (BL 48→72, LD 48→72); FA activation
+(cytosolic) at D 24→48, D 48→72, LD 24→48, LD 48→72 — all four FA-activation
+rows survive; Fatty acid oxidation (BL 48→72, LD 48→72); Leukotriene
+(D 48→72, LD 48→72).
+
+Demoted to Tier C `floor_artifact` (12): Arachidonic acid at D 48→72;
+Aromatic AA (phenylalanine/tyrosine/tryptophan biosynthesis) across
+BL/D/LD 24→48 — all three; BCAA (valine/leucine/isoleucine) across BL/D/LD
+24→48 — all three; Fatty acid oxidation at D 48→72; Leukotriene at BL 24→48
+and BL 48→72; Nucleotide at LD 24→48; Pyrimidine at D 48→72.
+
+**Headline impact.** Tier A 62 → 50; Tier C 21 → 33 (12 added with
+`flag_reason = "floor_artifact"`, 0 of which are retinoid). The amino-acid
+24→48 story (Aromatic AA + BCAA, 6 of the 12 demotions) was a polytope-shape
+artefact of the 24→48 biomass_max drop. The FA-handling / eicosanoid
+developmental signal is robust under matched floors.
+
+**Columns added by s85.** `W1_matched_floor`, `p_matched_floor` (NaN unless
+F2 row with a matched-floor result); `pre_correction_retinoid` (bool, set
+from the subsystem list — survives any in-place file edit by downstream
+scripts); `flag_reason` (Tier C only).
+
+**Outputs.** `grace_v4/results/stats_v7_matched_f2/*.csv` (6 contrasts),
+`grace_v4/results/findings_v7_mean_dropzero/{tierA,tierB,tierC}_final.csv`
++ `all_rows_in_family.csv` (rebuilt), figures in
+`grace_v4/results/figures_v7/`.

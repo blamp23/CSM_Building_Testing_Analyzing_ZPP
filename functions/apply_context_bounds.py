@@ -71,15 +71,90 @@ def _load_tables(repo=_REPO_DEFAULT):
     keep_set = set(led.loc[led.action.isin(
         ["keep_exchange","medium_uptake","ysl_lipid_delivery"]),
         "exchange_MAR_id"].dropna())
-    # medium_uptake (class-1 vitamins/carotenoid, not in 105): lb=-1000.
+    # medium_uptake rows: lb comes from per-cell demand bounds (see
+    # _load_demand_bounds), not a fixed -1000. See §11.19.
     medium_uptake_set = set(led.loc[led.action == "medium_uptake",
                                     "exchange_MAR_id"].dropna())
     return mb, close_set, keep_set, medium_uptake_set
 
 
+def _load_demand_bounds(repo=_REPO_DEFAULT):
+    """
+    Per-cell demand bounds for the 4 free-supplied class-1 rows (inositol,
+    β-carotene, α/γ-tocotrienols). Written by s266_compute_demand_bounds.py.
+    Returns {(cond, hpf, mar): lb_corrected}.  See §11.19.
+    """
+    import os
+    repo = Path(os.environ.get("V7_REPO", repo))
+    for candidate in [
+        repo / "grace_v4/results/qc/medium_uptake_demand_bounds.csv",
+        repo / "results/qc/medium_uptake_demand_bounds.csv",
+        repo / "medium_uptake_demand_bounds.csv",
+    ]:
+        if candidate.exists():
+            df = pd.read_csv(candidate)
+            out = {}
+            for _, r in df.iterrows():
+                if np.isfinite(r.lb_corrected):
+                    out[(str(r.cond), int(r.hpf), str(r.mar))] = float(r.lb_corrected)
+            return out
+    # If the file is missing, callers get a loud failure in apply_context_bounds
+    return None
+
+
+def _run_energy_gate(S, lb, ub, idx, rxns, cond, hpf):
+    """
+    §11.19 energy-source gate.
+    All 4 free-supplied rows (medium_uptake) are kept at their demand bounds
+    (already in lb). MEDIUM at -1000. Glucose at -1. O2 at -1000.
+    All other exchanges closed for uptake. Max ATP (MAR03964). Assert the
+    result stays within 31.5 + 0.5 of textbook.
+    """
+    from scipy.optimize import linprog
+    import scipy.sparse as sp
+    n_met, n_rxn = S.shape
+    is_ex = (np.diff(S.tocsc().indptr) == 1) if sp.issparse(S) else None
+    lb2 = lb.copy(); ub2 = ub.copy()
+    # Close every exchange for uptake
+    for j in range(n_rxn):
+        if is_ex is not None and not is_ex[j]: continue
+        lb2[j] = 0.0
+    # Open MEDIUM
+    for rid in MEDIUM:
+        if rid in idx: lb2[idx[rid]] = -1000.0
+    # Open free-supplied at their demand bounds (preserve from lb)
+    demand = _load_demand_bounds()
+    if demand is not None:
+        for (c, h, rid), lbv in demand.items():
+            if c == cond and h == hpf and rid in idx:
+                lb2[idx[rid]] = lbv
+    # Glucose primer
+    if "MAR09034" in idx:
+        lb2[idx["MAR09034"]] = -1.0; ub2[idx["MAR09034"]] = -1.0
+    # O2 at -1000
+    if O2_EX in idx:
+        lb2[idx[O2_EX]] = -1000.0; ub2[idx[O2_EX]] = 0.0
+    # Biomass free, ATP objective ub large
+    if "MAR00021" in idx:
+        j = idx["MAR00021"]; lb2[j] = 0.0; ub2[j] = max(ub2[j], 1000.0)
+    if "MAR03964" in idx:
+        ub2[idx["MAR03964"]] = 1e9
+    c_obj = np.zeros(n_rxn); c_obj[idx["MAR03964"]] = -1.0  # minimise -ATP
+    A_eq = S.toarray() if sp.issparse(S) else np.asarray(S)
+    res = linprog(c_obj, A_eq=A_eq, b_eq=np.zeros(n_met),
+                  bounds=list(zip(lb2, ub2)), method="highs")
+    atp = -res.fun if res.success else float("inf")
+    assert atp - 31.5 < 0.5, (
+        f"ENERGY_GATE FAIL for cond={cond} hpf={hpf}: ATP = {atp:.3f} > 32.0 "
+        f"(31.5 + 0.5 slack). Free-supplied rows are producing >textbook "
+        f"ATP. See §11.19."
+    )
+    return atp
+
+
 def apply_context_bounds(lb, ub, rxns, is_ex, cond, hpf,
                          frame="A", matched_biomax=None, repo=_REPO_DEFAULT,
-                         bound_ex=None):
+                         bound_ex=None, S=None, skip_energy_gate=False):
     """
     lb, ub, rxns, is_ex: numpy arrays / list from the loaded model.
     cond in {'BL','D','LD'}; hpf in {24,48,72,96,120}.
@@ -87,9 +162,15 @@ def apply_context_bounds(lb, ub, rxns, is_ex, cond, hpf,
        separate LP; this function returns lb/ub *without* the biomass
        floor set); pass frame='matched' with matched_biomax to set the
        matched-floor biomass_lb.
+    S: stoichiometric matrix (scipy.sparse or dense ndarray). If provided,
+       the §11.19 energy-source gate is run as a post-condition assertion.
+       If None, gate is skipped silently (legacy callers).
+    skip_energy_gate: emergency bypass (set True only for diagnostic runs
+       that intentionally violate the gate; e.g. the medium-energy audit).
     Returns (lb_new, ub_new, idx, is_ex).
     """
     mb, close_set, keep_set, medium_uptake_set = _load_tables(repo)
+    demand_lb = _load_demand_bounds(repo)
     lb = np.asarray(lb, dtype=float).copy()
     ub = np.asarray(ub, dtype=float).copy()
     idx = {r: i for i, r in enumerate(rxns)}
@@ -112,14 +193,34 @@ def apply_context_bounds(lb, ub, rxns, is_ex, cond, hpf,
         j = idx[O2_EX]
         lb[j] = -OCR[hpf]; ub[j] = 0.0
 
-    # -------- (2b) Free supply for unmeasured class-1 medium_uptake --------
-    # 2026-10-01: medium_uptake rows (α/γ-tocotrienol, β-carotene, inositol)
-    # not in the 105 measured set get lb=-1000 so unmeasured essentials
-    # don't become default-±10 limiters.
+    # -------- (2b) Per-cell demand bounds on medium_uptake rows -----------
+    # §11.19 (2026-10-12): medium_uptake rows (α/γ-tocotrienol, β-carotene,
+    # inositol) previously opened at lb=-1000. The energy-source gate
+    # (s261/s264) showed β-carotene MAR09276 generated ~971 ATP excess over
+    # textbook glucose in every extracted cell, and inositol a further
+    # ~1104 in the base. The fix: lb_i = -1.1 × |FVA_min(v_i | biomass_max)|,
+    # floor at -1e-3. See grace_v4/results/qc/medium_uptake_demand_bounds.csv.
     measured_set = set(mb.ex_rxn.unique())
     for rid in medium_uptake_set:
         if rid in idx and rid not in measured_set:
-            lb[idx[rid]] = -1000.0
+            key = (cond, hpf, rid)
+            if demand_lb is not None and key in demand_lb:
+                lb[idx[rid]] = demand_lb[key]
+            elif demand_lb is None:
+                # Table missing — raise clearly rather than silently default
+                raise FileNotFoundError(
+                    "medium_uptake_demand_bounds.csv not found; run "
+                    "grace_v4/scripts/s266_compute_demand_bounds.py first "
+                    "or set V7_REPO to the correct path."
+                )
+            else:
+                # Table exists but this (cond, hpf, mar) not computed —
+                # fall back to the pre-§11.19 default so legacy cells still
+                # work. Warn so callers can see.
+                import warnings
+                warnings.warn(f"no demand bound for ({cond}, {hpf}, {rid}); "
+                              "falling back to lb=-1000", RuntimeWarning)
+                lb[idx[rid]] = -1000.0
 
     # -------- assertions ---------------------------------------------------
     # a) ledger closes are still closed (or pruned from model)
@@ -150,6 +251,10 @@ def apply_context_bounds(lb, ub, rxns, is_ex, cond, hpf,
     n_measured_present = sum(1 for rid in measured_ex_all if rid in idx)
     assert n_scaled == n_measured_present, \
         f"ASSERTION: flux scaling applied to {n_scaled}, expected {n_measured_present} present in model (of 105 total)"
+
+    # e) §11.19 energy-source gate (post-condition). Only run if S provided.
+    if S is not None and not skip_energy_gate:
+        _run_energy_gate(S, lb, ub, idx, rxns, cond, hpf)
 
     return lb, ub, idx, is_ex
 
