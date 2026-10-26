@@ -1,8 +1,15 @@
-# v7 pipeline — linear flow
+# v7/v8 pipeline — linear flow
 
 End-to-end sequence from measured data to frozen findings. Each stage lists
 inputs, outputs, and the amendment it's governed by. Nothing in this doc
 re-defines prior stages — read `FAMILY_PREREG.md` for the amendment trail.
+
+**2026-10-26 reframe:** Stages 6–10 (W1 contrasts → tier export → figures) are
+**superseded** for the chapter. The chapter uses a per-reaction DESeq-style
+framework instead; see Stage 12 and `v8_analysis/`. Stages 0–5 (model + sample
++ loop + pool + subset) are unchanged and feed both pipelines. Stage 11 (F2
+matched-floor resample) also feeds the v8 pipeline. The `v7_final/` deliverable
+is retained as a frozen artifact of the earlier Tier A/B/C analysis.
 
 ## Snapshot of outputs (frozen 2026-10-13)
 
@@ -126,6 +133,64 @@ CFF + pool + 6 F2 contrasts locally. Writes
 
 Verdict: 10 of 22 flagged F2 Tier A rows survive (lipid/eicosanoid family),
 12 demote to Tier C (`floor_artifact`; amino-acid 24→48 rows).
+
+## Stage 12 — chapter analytical reframe (2026-10-26, `v8_analysis/`)
+
+**Rationale.** Hopsy samples are correlated draws from one polytope, not
+biological replicates. Per-sample W1 contrasts (Stage 6) and per-reaction
+Mann-Whitney p-values are both overpowered on 2,000-sample pools. The
+reframe drops both and reports exactly one significance measure: a
+hypergeometric enrichment q-value on the count of notable reactions per
+subsystem, BH-corrected within contrast. Combined with per-cell median
+centering of log flux (removing the OCR cap × hpf and biomass_max scaling
+baselines), the framework asks whether a subsystem's reactions shift
+coherently in direction + magnitude relative to the rest of the model.
+
+**Inputs:** `pooled_v7/{cell}_pooled.csv` (Stage 5) and
+`subsets_v7/{cell}_subset_membership.csv` (Stage 5), plus the v7_models
+.mat files (Stage 0) for the capacity LPs. The matched-floor F2 pool
+(Stage 11) is implicit in the F2 contrasts.
+
+**Scripts (linear order in `v8_analysis/scripts/`):**
+
+| # | Script | Produces |
+|---|---|---|
+| 01 | `01_substrate_yields.py` | ATP yield per substrate × cell (Table S7) |
+| 02 | `02_atp_ceiling_physio.py` | ATP ceiling under physio OCR + envelope (§3.2) |
+| 03 | `03_atp_ceiling_glucose.py` | ATP ceiling glucose-only control (§3.2) |
+| 04 | `04_comparison_tables.py` | Three-layer F1/F2 tables (raw log2FC) |
+| 05 | `05_pca_raw.py` | PCA + initial hypergeometric enrichment |
+| 06 | `06_pca_centered.py` | Per-cell-centered PCA + comparison figure |
+| 07 | `07_normalize_centered.py` | Centered F1/F2 tables + enrichment (§3.1 primary) |
+| 08 | `08_capacity_figure.py` | Xenobiotic clearance LPs + 2×2 figure (§3.3) |
+| 09 | `09_density_plots.py` | Developmental + light-regime density ridges (§3.1) |
+
+Scripts 01, 02, 03, 08 need Gurobi. 04–07, 09 are pandas-only.
+
+**Path configuration.** All 9 scripts import from `v8_analysis/scripts/config.py`.
+Repo-internal paths resolve from `__file__`; large external data (v7_models,
+pooled_v7, subsets_v7) resolve from `$CSM_DATA_ROOT`, defaulting to the
+author's OneDrive working location. Set the env var to point at a local
+mirror.
+
+**Outputs (committed to git under `v8_analysis/chapter_assets/`):**
+`comparison_tables/subsystem_summary_F{1,2}_centered.csv` (§3.1 primary),
+`per_reaction_flux_F{1,2}_centered.csv`, `reaction_inventory_F{1,2}.csv`,
+`pca_cells*.pdf/csv`, `tables/table_{1..6}.csv`, `table_S{1..15}.csv`,
+`xenobiotic_capacity.csv`, `figures/metabolic_capacity_developmental.pdf`.
+Density figures (`figures/subsystem_density/`) are regenerable by script 09
+and git-ignored.
+
+**Deprecated by Stage 12:**
+- Stage 6 outputs (`stats_v7_mean_dropzero/`) — W1 contrasts are no longer
+  reported.
+- Stage 7 outputs (`findings_v7_mean_dropzero/`) — family findings are not
+  cited in the chapter.
+- Stage 8 outputs (`tierA_final.csv`, `tierB_final.csv`, `tierC_final.csv`)
+  — the tier framework is retained in `v7_final/` as a frozen artifact of
+  the earlier analysis, but the chapter does not cite the three-tier split.
+- Stage 10 figures — superseded by density ridges (script 09) and the 2×2
+  capacity figure (script 08).
 
 ---
 

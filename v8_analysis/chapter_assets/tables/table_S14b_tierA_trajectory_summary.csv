@@ -1,0 +1,20 @@
+family,subsystem,n_tierA,n_sisters,n_sisters_moving_snr2,n_sisters_moving_snr1,pct_moving_snr2
+F2,Glycolysis / Gluconeogenesis,2,5,4,4,80.0
+F2,Arginine and proline metabolism,2,10,7,8,70.0
+F2,Fatty acid oxidation,2,10,7,7,70.0
+F2,Arachidonic acid metabolism,4,8,5,6,62.5
+F2,Leukotriene metabolism,4,8,4,5,50.0
+F2,Nucleotide metabolism,1,11,5,6,45.45454545454545
+F1,Pyrimidine metabolism,4,11,5,6,45.45454545454545
+F1,"Valine, leucine, and isoleucine metabolism",2,13,5,7,38.46153846153846
+F2,Pyrimidine metabolism,2,10,3,3,30.0
+F2,"Phenylalanine, tyrosine and tryptophan biosynthesis",2,10,3,3,30.0
+F1,Arginine and proline metabolism,5,10,3,6,30.0
+F1,Nucleotide metabolism,3,12,3,5,25.0
+F2,Fatty acid activation (cytosolic),4,8,2,2,25.0
+F1,Acylglycerides metabolism,2,13,3,6,23.076923076923077
+F1,"Phenylalanine, tyrosine and tryptophan biosynthesis",4,11,2,4,18.181818181818183
+F1,Steroid metabolism,2,13,2,4,15.384615384615385
+F2,"Valine, leucine, and isoleucine metabolism",1,11,1,2,9.090909090909092
+F1,Leukotriene metabolism,2,13,1,6,7.6923076923076925
+F1,Bile acid biosynthesis,2,13,0,2,0.0

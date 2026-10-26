@@ -1,0 +1,9 @@
+quantity,value,source
+Reactions,"12,909",`len(m.rxns)` on baked_ocr_24_v7.mat
+Metabolites,"8,344",`len(m.mets)`
+Compartments,9,"e, x, m, c, l, r, g, n, i"
+Reactions with ≥1 gene,"7,861  (60.9 %)",regex over m.grRules
+Gene-less reactions,"5,048  (39.1 %)","transporters, exchanges, templates"
+Unique gene symbols,"2,697",across all GPRs
+Symbol → Ensembl map rows,"5,268",`results/qc/gene_map_ensdarg_to_model.csv`
+Model symbols mapping,"2,592 / 2,697 (96.1 %)",to ≥1 Ensembl ID

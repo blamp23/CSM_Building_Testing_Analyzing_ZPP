@@ -1,0 +1,8 @@
+family,contrast,subsystem,dir_label,per_rep_A_higher,per_rep_B_higher,majority,margin,biggest_rep,biggest_delta
+F1,BL_120_vs_LD_120,Steroid metabolism,+,1,17,−,17/18,MAR07942,1.847
+F1,BL_24_vs_D_24,Pyrimidine metabolism,−,23,19,+,23/42,MAR04675,-35.425
+F1,BL_72_vs_LD_72,Arginine and proline metabolism,−,16,16,?,16/32,MAR08427,111.629
+F1,D_120_vs_LD_120,Steroid metabolism,+,1,17,−,17/18,MAR07942,1.182
+F2,D_96_vs_D_120,Nucleotide metabolism,−,68,15,+,68/83,MAR07800,28.634
+F2,LD_48_vs_LD_72,Fatty acid activation (cytosolic),+,7,52,−,52/59,MAR00156,-102.72
+F2,LD_96_vs_LD_120,"Valine, leucine, and isoleucine metabolism",+,13,15,−,15/28,MAR03783,39.204

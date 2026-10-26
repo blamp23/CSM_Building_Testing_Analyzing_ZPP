@@ -39,6 +39,10 @@ figs/
 tmp/
 scratch/
 
+## v8_analysis: large or regenerable; commit code + small CSVs only
+v8_analysis/chapter_assets/figures/subsystem_density/
+v8_analysis/scripts/__pycache__/
+
 ## editor + OS
 .DS_Store
 .AppleDouble

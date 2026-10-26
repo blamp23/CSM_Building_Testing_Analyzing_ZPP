@@ -1,0 +1,16 @@
+pair,gap_raw,topology,envelope,interaction,verdict
+BL_24 – D_24,+0.05,+0.11,-0.07,0.00,no material gap
+BL_24 – LD_24,+0.09,+0.00,+0.08,+0.01,no material gap
+D_24 – LD_24,+0.04,-0.11,+0.15,0.00,no material gap
+BL_48 – D_48,-0.09,+0.03,-0.11,-0.01,no material gap
+BL_48 – LD_48,-0.09,+0.13,-0.23,+0.01,no material gap
+D_48 – LD_48,+0.00,+0.08,-0.12,+0.04,no material gap
+BL_72 – D_72,+1.57,+0.00,+1.57,0.00,envelope
+BL_72 – LD_72,+0.23,+0.00,+0.22,0.00,mixed/small
+D_72 – LD_72,-1.35,+0.00,-1.35,0.00,envelope
+BL_96 – D_96,-4.04,-0.89,-0.72,-2.43,not separable
+BL_96 – LD_96,-4.39,-0.89,+0.08,-3.59,not separable
+D_96 – LD_96,-0.36,-0.08,-0.13,-0.15,mixed/small
+BL_120 – D_120,-0.11,-0.24,+0.05,+0.08,mixed/small
+BL_120 – LD_120,-0.84,-0.04,-0.80,0.00,envelope
+D_120 – LD_120,-0.73,+0.00,-0.73,0.00,envelope

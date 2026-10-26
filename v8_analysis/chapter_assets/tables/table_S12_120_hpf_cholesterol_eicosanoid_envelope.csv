@@ -1,0 +1,12 @@
+rxn,metabolite,BL_in_envelope,D_in_envelope,LD_in_envelope,BL_fc,D_fc,LD_fc,BL_flux_mmol_gDW_hr,D_flux_mmol_gDW_hr,LD_flux_mmol_gDW_hr,present_in_all_3
+MAR00711,Cholesterol Ester,False,False,False,,,,,,,False
+MAR00714,Cholesterol Ester (from FullR2),False,False,False,,,,,,,False
+MAR00720,"7α,24(S)-Dihydroxycholesterol",False,False,False,,,,,,,False
+MAR00721,"7α,25-Dihydroxycholesterol",False,False,False,,,,,,,False
+MAR00722,"7α,27-Dihydroxycholesterol",False,False,False,,,,,,,False
+MAR00567,Arachidate (ω-6 20:4),True,True,True,1.6033,1.5346,1.4946,2.239e-05,1.898e-05,2.402e-05,True
+MAR00568,n-C20:4 (ω-3 20:4),True,True,True,1.2672,1.4976,1.0082,1.770e-05,1.853e-05,1.620e-05,True
+MAR00626,γ-Linolenic Acid (ω-6 18:3),True,True,True,0.8915,1.1758,0.4688,1.245e-05,1.455e-05,7.534e-06,True
+MAR00571,Clupanodonic Acid (DPA 22:5),True,True,True,1.3394,1.6677,1.0718,1.871e-05,2.063e-05,1.722e-05,True
+MAR10310,LPE (22:6) DHA-carrying,True,True,True,1.1936,1.3738,0.6315,1.667e-05,1.699e-05,1.015e-05,True
+MAR10432,11-Cis-Eicosenoate,True,True,True,1.2875,1.5789,0.8552,1.798e-05,1.953e-05,1.374e-05,True

@@ -1,0 +1,13 @@
+pair,A,B,biomax_AA,biomax_AB,biomax_BA,biomax_BB,gap_raw,topology,envelope,interaction,verdict,source
+BL_24→BL_48,BL_24,BL_48,11.063,10.0,10.195,9.332,1.731,0.867,1.063,-0.199,mixed,s189 fresh
+BL_48→BL_72,BL_48,BL_72,9.332,12.951,9.143,12.908,-3.576,0.188,-3.619,-0.145,envelope,s178 baseline (lipid relay)
+BL_72→BL_96,BL_72,BL_96,12.908,9.423,7.991,8.535,4.373,4.917,3.485,-4.029,not separable,s189 fresh
+BL_96→BL_120,BL_96,BL_120,8.535,8.264,9.401,11.901,-3.366,-0.866,0.271,-2.772,not separable,s189 fresh
+D_24→D_48,D_24,D_48,11.016,10.0,10.256,9.422,1.594,0.76,1.016,-0.182,mixed,s178 baseline (lipid relay)
+D_48→D_72,D_48,D_72,9.422,11.445,9.288,11.334,-1.912,0.134,-2.023,-0.023,envelope,s178 baseline (lipid relay)
+D_72→D_96,D_72,D_96,11.334,12.673,11.228,12.572,-1.239,0.106,-1.339,-0.005,envelope,s178 baseline (lipid relay)
+D_96→D_120,D_96,D_120,12.572,12.171,12.48,12.012,0.56,0.092,0.401,0.067,envelope,s189 fresh
+LD_24→LD_48,LD_24,LD_48,10.975,10.0,10.083,9.421,1.555,0.892,0.975,-0.313,mixed,s178 baseline (lipid relay)
+LD_48→LD_72,LD_48,LD_72,9.421,12.47,9.37,12.682,-3.261,0.051,-3.049,-0.263,envelope,s178 baseline (lipid relay)
+LD_72→LD_96,LD_72,LD_96,12.682,12.756,12.899,12.928,-0.247,-0.217,-0.075,0.045,topology,s178 baseline (lipid relay)
+LD_96→LD_120,LD_96,LD_120,12.928,13.09,12.758,12.741,0.188,0.17,-0.161,0.179,not separable,s189 fresh

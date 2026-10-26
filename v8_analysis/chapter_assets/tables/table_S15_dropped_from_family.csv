@@ -1,0 +1,49 @@
+subsystem,n_contrasts,n_pass,in_exclude,max_N_tier2,max_carry_both,min_loop_ratio,primary_reason
+Hormone biosynthesis,22,0,False,,1,,N_tier2_null (W1 not computable)
+Vitamin D metabolism,5,0,False,3.0,3,0.0,N_tier2_null (W1 not computable)
+Vitamin B2 metabolism,27,0,False,,1,,N_tier2_null (W1 not computable)
+Vitamin A metabolism,27,0,False,,1,,N_tier2_null (W1 not computable)
+Ubiquinone synthesis,27,0,False,,1,,N_tier2_null (W1 not computable)
+Thiamine metabolism,12,0,False,,2,,N_tier2_null (W1 not computable)
+Phosphatidylinositol phosphate metabolism,27,0,False,3.0,3,0.0,N_tier2_null (W1 not computable)
+Metabolism of other amino acids,17,0,False,,1,,N_tier2_null (W1 not computable)
+Lipoic acid metabolism,27,0,False,,1,,N_tier2_null (W1 not computable)
+Linoleate metabolism,21,0,False,3.0,3,0.0,N_tier2_null (W1 not computable)
+Keratan sulfate biosynthesis,14,0,False,,1,,N_tier2_null (W1 not computable)
+Vitamin E metabolism,27,0,False,,2,,N_tier2_null (W1 not computable)
+Heparan sulfate degradation,27,0,False,,1,,N_tier2_null (W1 not computable)
+Heme degradation,21,0,False,,1,,N_tier2_null (W1 not computable)
+Glycosphingolipid biosynthesis-globo series,27,0,False,,1,,N_tier2_null (W1 not computable)
+Galactose metabolism,27,0,False,3.0,3,0.0,N_tier2_null (W1 not computable)
+Xenobiotics metabolism,23,0,False,3.0,3,0.0,N_tier2_null (W1 not computable)
+Biotin metabolism,1,0,False,,1,,N_tier2_null (W1 not computable)
+Biopterin metabolism,27,0,False,3.0,4,0.0,N_tier2_null (W1 not computable)
+C5-branched dibasic acid metabolism,27,0,False,,0,,N_tier2_null (W1 not computable)
+Carnitine shuttle (peroxisomal),27,0,False,3.0,4,0.0,N_tier2_null (W1 not computable)
+Cholesterol biosynthesis 3 (Kandustch-Russell pathway),10,0,False,,1,,N_tier2_null (W1 not computable)
+Cholesterol biosynthesis 2,27,0,False,,2,,N_tier2_null (W1 not computable)
+Beta oxidation of poly-unsaturated fatty acids (mitochondrial),27,0,False,,2,,N_tier2_null (W1 not computable)
+Beta oxidation of phytanic acid (peroxisomal),27,0,False,,0,,N_tier2_null (W1 not computable)
+Fatty acid desaturation (odd-chain),27,0,False,,2,,N_tier2_null (W1 not computable)
+Ether lipid metabolism,27,0,False,4.0,4,0.0,N_tier2_null (W1 not computable)
+Exchange/demand reactions,27,27,False,141.0,150,0.05263157894736842,PASS
+Beta oxidation of unsaturated fatty acids (n-7) (mitochondrial),27,0,False,3.0,3,0.0,carry_both < 5
+Riboflavin metabolism,27,0,False,4.0,4,0.0,carry_both < 5
+Bile acid recycling,14,0,False,4.0,4,0.0,carry_both < 5
+Terpenoid backbone biosynthesis,27,0,False,3.0,3,0.0,carry_both < 5
+Sulfur metabolism,27,0,False,3.0,3,0.0,carry_both < 5
+Serotonin and melatonin biosynthesis,27,0,False,4.0,4,0.0,carry_both < 5
+Protein degradation,27,0,False,4.0,4,0.0,carry_both < 5
+Ascorbate and aldarate metabolism,27,0,False,4.0,4,0.0,carry_both < 5
+Fatty acid elongation (odd-chain),27,0,False,3.0,3,0.0,carry_both < 5
+O-glycan metabolism,27,0,False,4.0,4,0.0,carry_both < 5
+Glycosphingolipid biosynthesis-lacto and neolacto series,27,0,False,3.0,3,0.0,carry_both < 5
+Fatty acid biosynthesis (odd-chain),27,0,False,3.0,3,0.0,carry_both < 5
+Prostaglandin biosynthesis,27,0,False,4.0,4,0.0,carry_both < 5
+Pool reactions,27,0,True,5.0,5,0.0,in_EXCLUDE_SUBS
+Transport reactions,27,0,True,472.0,544,0.09970674486803519,in_EXCLUDE_SUBS
+Isolated,27,0,True,3.0,3,0.0,in_EXCLUDE_SUBS
+Oxidative phosphorylation,27,0,False,4.0,8,1.0,loop_flagged / N_tier2 >= 0.30
+Miscellaneous,27,0,False,8.0,12,0.5,loop_flagged / N_tier2 >= 0.30
+Carnitine shuttle (mitochondrial),27,0,False,25.0,40,0.3333333333333333,loop_flagged / N_tier2 >= 0.30
+Folate metabolism,27,0,False,16.0,27,0.4666666666666667,loop_flagged / N_tier2 >= 0.30

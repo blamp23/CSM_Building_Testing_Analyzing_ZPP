@@ -1,0 +1,16 @@
+cell,reactions,metabolites,source
+BL_24,5136,3722,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_BL_24.mat
+BL_48,5001,3737,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_BL_48.mat
+BL_72,5245,3903,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_BL_72.mat
+BL_96,5528,4115,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_BL_96.mat
+BL_120,5504,4103,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_BL_120.mat
+D_24,5097,3704,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_D_24.mat
+D_48,4841,3690,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_D_48.mat
+D_72,5213,3876,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_D_72.mat
+D_96,5464,4066,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_D_96.mat
+D_120,5559,4116,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_D_120.mat
+LD_24,4815,3705,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_LD_24.mat
+LD_48,4862,3710,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_LD_48.mat
+LD_72,5327,3956,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_LD_72.mat
+LD_96,5552,4093,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_LD_96.mat
+LD_120,5592,4163,reviewer_packet_v4_slim/v7_models/trans_rfastcormics_LD_120.mat

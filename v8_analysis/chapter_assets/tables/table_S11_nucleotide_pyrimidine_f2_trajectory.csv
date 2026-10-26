@@ -1,0 +1,13 @@
+regime,transition,subsystem,W1,snr,q_BH,tier,reps_A_higher,reps_B_higher,reps_scored,direction
+BL,24→48,Nucleotide metabolism,0.143,1.61,1.0,ns,28,50,78,rises 24→48
+BL,24→48,Pyrimidine metabolism,0.357,4.42,0.7058,ns,23,22,45,undetermined (23/45 = 51%)
+BL,48→72,Nucleotide metabolism,0.369,4.15,1.0,ns,21,62,83,rises 48→72
+BL,48→72,Pyrimidine metabolism,0.921,11.42,0.3831,ns,14,33,47,rises 48→72
+D,24→48,Nucleotide metabolism,0.339,3.82,0.7152,ns,41,43,84,undetermined (43/84 = 51%)
+D,24→48,Pyrimidine metabolism,0.882,10.94,0.0733,C,25,17,42,undetermined (25/42 = 60%)
+D,48→72,Nucleotide metabolism,0.602,6.77,0.9263,ns,40,42,82,undetermined (42/82 = 51%)
+D,48→72,Pyrimidine metabolism,1.25,15.49,0.0497,C,12,34,46,rises 48→72
+LD,24→48,Nucleotide metabolism,1.086,12.22,0.0443,C,25,55,80,rises 24→48
+LD,24→48,Pyrimidine metabolism,0.872,10.82,0.0969,C,16,24,40,rises 24→48
+LD,48→72,Nucleotide metabolism,0.207,2.32,1.0,ns,29,50,79,rises 48→72
+LD,48→72,Pyrimidine metabolism,0.262,3.25,1.0,ns,19,27,46,undetermined (27/46 = 59%)

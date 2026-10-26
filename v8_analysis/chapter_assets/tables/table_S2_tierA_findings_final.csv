@@ -1,0 +1,51 @@
+family,contrast,subsystem,N,W1,snr,reps_A_higher,reps_B_higher,reps_scored,direction,q_BH,p_floor,n_rep_sig
+F1,BL_120_vs_D_120,Acylglycerides metabolism,16,0.93,12.2,6,10,16,BL_120 lower than D_120,0.031,—,2
+F1,BL_120_vs_D_120,"Phenylalanine, tyrosine and tryptophan biosynthesis",46,1.01,11.6,41,4,45,BL_120 higher than D_120,0.012,—,5
+F1,BL_120_vs_LD_120,Bile acid biosynthesis,28,0.8,4.4,5,26,31,BL_120 lower than LD_120,0.012,—,2
+F1,BL_120_vs_LD_120,Leukotriene metabolism,31,0.61,3.5,30,1,31,BL_120 higher than LD_120,0.056,—,2
+F1,BL_120_vs_LD_120,"Phenylalanine, tyrosine and tryptophan biosynthesis",48,0.68,7.8,38,9,47,BL_120 higher than LD_120,0.012,—,5
+F1,BL_120_vs_LD_120,Steroid metabolism,19,0.76,5.1,1,17,18,BL_120 lower than LD_120,0.07,—,2
+F1,BL_24_vs_D_24,Nucleotide metabolism,84,0.53,6.0,35,50,85,undetermined (within 60/40),0.056,—,3
+F1,BL_24_vs_D_24,Pyrimidine metabolism,41,0.85,10.6,23,19,42,undetermined (within 60/40),0.012,—,4
+F1,BL_48_vs_LD_48,Pyrimidine metabolism,45,0.94,11.7,20,24,44,undetermined (within 60/40),0.012,—,4
+F1,BL_72_vs_D_72,Arginine and proline metabolism,35,1.35,16.5,11,24,35,BL_72 lower than D_72,0.012,—,5
+F1,BL_72_vs_D_72,"Phenylalanine, tyrosine and tryptophan biosynthesis",27,0.66,7.5,7,21,28,BL_72 lower than D_72,0.038,—,5
+F1,BL_72_vs_D_72,"Valine, leucine, and isoleucine metabolism",29,0.63,6.8,5,26,31,BL_72 lower than D_72,0.05,—,2
+F1,BL_72_vs_LD_72,Arginine and proline metabolism,32,0.97,11.9,16,16,32,undetermined (within 60/40),0.012,—,5
+F1,BL_96_vs_LD_96,Arginine and proline metabolism,38,1.75,21.4,24,14,38,BL_96 higher than LD_96,0.012,—,5
+F1,D_120_vs_LD_120,Acylglycerides metabolism,16,1.17,15.4,12,4,16,D_120 higher than LD_120,0.012,—,2
+F1,D_120_vs_LD_120,Bile acid biosynthesis,25,1.32,7.3,2,24,26,D_120 lower than LD_120,0.012,—,2
+F1,D_120_vs_LD_120,Leukotriene metabolism,33,0.84,4.9,29,2,31,D_120 higher than LD_120,0.012,—,2
+F1,D_120_vs_LD_120,Steroid metabolism,19,0.98,6.6,1,17,18,D_120 lower than LD_120,0.045,—,2
+F1,D_120_vs_LD_120,"Valine, leucine, and isoleucine metabolism",29,1.14,12.4,17,11,28,D_120 higher than LD_120,0.012,—,2
+F1,D_24_vs_LD_24,Nucleotide metabolism,85,0.59,6.7,52,32,84,D_24 higher than LD_24,0.012,—,3
+F1,D_24_vs_LD_24,Pyrimidine metabolism,42,0.78,9.7,31,11,42,D_24 higher than LD_24,0.012,—,4
+F1,D_48_vs_LD_48,Nucleotide metabolism,80,0.82,9.2,31,50,81,D_48 lower than LD_48,0.023,—,3
+F1,D_48_vs_LD_48,Pyrimidine metabolism,45,1.43,17.7,15,30,45,D_48 lower than LD_48,0.012,—,4
+F1,D_72_vs_LD_72,Arginine and proline metabolism,32,0.56,6.9,25,7,32,D_72 higher than LD_72,0.038,—,5
+F1,D_96_vs_LD_96,Arginine and proline metabolism,38,1.32,16.2,24,14,38,D_96 higher than LD_96,0.012,—,5
+F1,D_96_vs_LD_96,"Phenylalanine, tyrosine and tryptophan biosynthesis",46,0.98,11.3,14,33,47,D_96 lower than LD_96,0.012,—,5
+F2,BL_48_vs_BL_72,Arachidonic acid metabolism,20,2.02,17.5,0,18,18,rises from BL_48 to BL_72,0.01,0.042,5
+F2,BL_48_vs_BL_72,Fatty acid oxidation,147,1.13,20.5,26,142,168,rises from BL_48 to BL_72,0.01,0.004,3
+F2,D_24_vs_D_48,Fatty acid activation (cytosolic),67,1.35,24.7,46,20,66,falls from D_24 to D_48,0.01,0.000,5
+F2,D_48_vs_D_72,Fatty acid activation (cytosolic),66,1.41,25.7,10,56,66,rises from D_48 to D_72,0.01,0.000,5
+F2,D_48_vs_D_72,Leukotriene metabolism,32,1.85,10.7,0,29,29,rises from D_48 to D_72,0.01,0.002,6
+F2,D_72_vs_D_96,Arachidonic acid metabolism,19,1.47,12.8,0,19,19,rises from D_72 to D_96,0.01,—,5
+F2,D_72_vs_D_96,Leukotriene metabolism,31,1.38,7.9,0,28,28,rises from D_72 to D_96,0.018,—,6
+F2,D_96_vs_D_120,Nucleotide metabolism,80,0.59,6.6,68,15,83,falls from D_96 to D_120,0.033,—,2
+F2,D_96_vs_D_120,"Phenylalanine, tyrosine and tryptophan biosynthesis",44,0.45,5.2,41,4,45,falls from D_96 to D_120,0.018,—,6
+F2,D_96_vs_D_120,Pyrimidine metabolism,44,0.78,9.7,34,9,43,falls from D_96 to D_120,0.01,—,3
+F2,LD_24_vs_LD_48,Fatty acid activation (cytosolic),67,1.71,31.3,45,14,59,falls from LD_24 to LD_48,0.01,0.000,5
+F2,LD_48_vs_LD_72,Arachidonic acid metabolism,19,1.95,16.9,0,19,19,rises from LD_48 to LD_72,0.018,0.030,5
+F2,LD_48_vs_LD_72,Fatty acid activation (cytosolic),59,1.61,29.5,7,52,59,rises from LD_48 to LD_72,0.01,0.000,5
+F2,LD_48_vs_LD_72,Fatty acid oxidation,148,1.24,22.5,13,147,160,rises from LD_48 to LD_72,0.01,0.019,3
+F2,LD_48_vs_LD_72,Leukotriene metabolism,30,1.73,10.0,0,29,29,rises from LD_48 to LD_72,0.01,0.049,6
+F2,LD_72_vs_LD_96,Arachidonic acid metabolism,20,0.82,7.1,1,18,19,rises from LD_72 to LD_96,0.064,—,5
+F2,LD_72_vs_LD_96,Arginine and proline metabolism,33,0.88,10.8,17,16,33,undetermined (within 60/40),0.01,—,3
+F2,LD_72_vs_LD_96,Glycolysis / Gluconeogenesis,24,0.91,7.4,14,9,23,falls from LD_72 to LD_96,0.026,—,2
+F2,LD_72_vs_LD_96,Leukotriene metabolism,31,1.37,7.9,0,29,29,rises from LD_72 to LD_96,0.01,—,6
+F2,LD_72_vs_LD_96,Pyrimidine metabolism,46,0.96,11.9,31,12,43,falls from LD_72 to LD_96,0.01,—,3
+F2,LD_96_vs_LD_120,Arginine and proline metabolism,37,1.58,19.4,14,22,36,rises from LD_96 to LD_120,0.01,—,3
+F2,LD_96_vs_LD_120,Glycolysis / Gluconeogenesis,23,1.3,10.5,5,18,23,rises from LD_96 to LD_120,0.058,—,2
+F2,LD_96_vs_LD_120,"Phenylalanine, tyrosine and tryptophan biosynthesis",48,0.99,11.4,39,9,48,falls from LD_96 to LD_120,0.01,—,6
+F2,LD_96_vs_LD_120,"Valine, leucine, and isoleucine metabolism",29,1.0,10.9,13,15,28,undetermined (within 60/40),0.038,—,4
