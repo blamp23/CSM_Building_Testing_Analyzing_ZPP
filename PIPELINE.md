@@ -2,7 +2,7 @@
 
 End-to-end sequence from measured data to frozen findings. Each stage lists
 inputs, outputs, and the amendment it's governed by. Nothing in this doc
-re-defines prior stages — read `FAMILY_PREREG.md` for the amendment trail.
+re-defines prior stages — read `legacy/docs/FAMILY_PREREG.md` for the amendment trail.
 
 **2026-10-26 reframe:** Stages 6–10 (W1 contrasts → tier export → figures) are
 **superseded** for the chapter. The chapter uses a per-reaction DESeq-style
@@ -68,9 +68,9 @@ Enzyme-subset collapse → `subsets_v7/{cell}_subset_membership.csv`
 
 ## Stage 6 — two-tier W1 contrasts
 
-`v7_analysis/statistics/two_tier_fast_mean_dropzero.py`. 42 contrasts
+`legacy/v7_pipeline_deprecated/statistics/two_tier_fast_mean_dropzero.py`. 42 contrasts
 (27 primary + 15 split-chain neg-control) run via
-`v7_analysis/launchers/run_contrasts_mean_dropzero.sh`. Writes
+`legacy/v7_pipeline_deprecated/launchers/run_contrasts_mean_dropzero.sh`. Writes
 `stats_v7_mean_dropzero/{A}_vs_{B}.csv`.
 
 Method of record = mean normaliser + drop zeros (§11.14). Median variant
@@ -78,14 +78,14 @@ runs in parallel for concordance (§11.12).
 
 ## Stage 7 — family findings
 
-`v7_analysis/statistics/findings_v7_mean_dropzero.py`. BH-FDR within
+`legacy/v7_pipeline_deprecated/statistics/findings_v7_mean_dropzero.py`. BH-FDR within
 family, SNR vs split-chain noise floor (§11.13), envelope-tracking flag
 (§11.13), floor-suspect flag (§11.10). Writes `findings_v7_mean_dropzero/`
 with `findings_family1.csv`, `findings_family2.csv`, `negcontrol_per_subsystem.csv`.
 
 ## Stage 8 — tier export (headline)
 
-`v7_analysis/statistics/export_tier_tables.py` (= s85). Applies:
+`legacy/v7_pipeline_deprecated/statistics/export_tier_tables.py` (= s85). Applies:
 - median-concordance gate (§11.14)
 - matched-floor resolution — F1 via BL_96 (§11.10), F2 via six-contrast
   matched-floor resample (§11.20)
@@ -99,7 +99,7 @@ Writes `tierA_final.csv`, `tierB_final.csv`, `tierC_final.csv`,
 
 ## Stage 9 — Tier 0 structural analysis
 
-`v7_analysis/tier0/`:
+`legacy/v7_pipeline_deprecated/tier0/`:
 - **tier0_2x2.py (§11.17)** — parent vs child FBA per cell + 2×2 topology ×
   envelope swap per F1 pair. Writes `tier0_parent_child_v7.csv` (15 cells),
   `tier0_2x2_v7.csv` (15 pairs × 4 corners + decomposition).
@@ -115,7 +115,7 @@ Writes `tierA_final.csv`, `tierB_final.csv`, `tierC_final.csv`,
 
 ## Stage 10 — figures
 
-`v7_analysis/figures/`:
+`legacy/v7_pipeline_deprecated/figures/`:
 - **figs_easy.py** — fig1 (design + funnel), fig2 (F2 developmental
   heatmap), fig3 (F1 photoperiod heatmap with ◆/▲/▼ glyphs), fig5
   (growth capacity attribution), figS4 (R̂/ESS violins), figS5 (mean vs
@@ -194,35 +194,61 @@ and git-ignored.
 
 ---
 
-## Reproducing the whole thing from a clean checkout
+## Reproducing from a clean checkout
 
-```
-# Prerequisites: Gurobi, Python 3.13, hopsy, PolyRound,
-# scipy, pandas, matplotlib, gurobipy, h5py.
+Two reproduction targets live in this repo. Pick the one you want.
 
-# 0-5: build models + sample + CFF + pool (see v7_analysis/README.md stages)
-# 6-7: contrasts + findings
-bash v7_analysis/launchers/run_contrasts_mean_dropzero.sh
-python v7_analysis/statistics/findings_v7_mean_dropzero.py
+### A. Chapter outputs (current, 2026-10-26)
 
-# 8: tier export
-python v7_analysis/statistics/export_tier_tables.py
+```bash
+# Prerequisites: Python 3.13 + pandas, numpy, scipy, matplotlib, scikit-learn,
+# h5py; Gurobi + gurobipy (for scripts 01/02/03/08).
+pip install -r v8_analysis/requirements.txt
 
-# 9: Tier 0
-python v7_analysis/tier0/tier0_2x2.py
-python v7_analysis/tier0/bl96_drilldown.py
-python v7_analysis/tier0/mar10693_vent_check.py
-python v7_analysis/tier0/robustness.py
+# Point at the local mirror of the Stage 0-5 outputs (model .mat files + pooled
+# samples). Default resolves to the author's OneDrive working location.
+export CSM_DATA_ROOT=/path/to/Discrete_Models
 
-# 10: figures
-python v7_analysis/figures/figs_easy.py
-python v7_analysis/figures/condition_axis_curves.py
-
-# 11: matched-floor F2 resample (requires Grace sampling first; see §11.20)
-bash v7_analysis/matched_floor/run_pipeline.sh
-python v7_analysis/statistics/export_tier_tables.py   # re-run to pick up matched-floor
+cd v8_analysis/scripts
+python 01_substrate_yields.py     # Table S7
+python 02_atp_ceiling_physio.py   # §3.2
+python 03_atp_ceiling_glucose.py  # §3.2 control
+python 04_comparison_tables.py    # §3.1 raw tables
+python 05_pca_raw.py              # PCA
+python 06_pca_centered.py         # Centered PCA
+python 07_normalize_centered.py   # §3.1 primary tables
+python 08_capacity_figure.py      # §3.3 + 2×2 figure
+python 09_density_plots.py        # §3.1 density ridges
 ```
 
-Outputs land in `grace_v4/results/` (sampling/stats/findings) and
-`v7_final/` (frozen snapshot). The `v7_final/` folder is immutable;
-`FREEZE.md` carries md5s.
+Outputs land in `v8_analysis/chapter_assets/` (committed) and
+`$CSM_DATA_ROOT/grace_v4/results/{atp_sweep_v7,v7_susceptibility}/`
+(regenerable; stays local).
+
+### B. Frozen W1/Tier A pipeline (pre-reframe, retained for provenance)
+
+Stages 6–10 scripts moved to `legacy/v7_pipeline_deprecated/`. Still runnable
+if you need to reproduce the Tier A/B/C deliverable at `v7_final/`:
+
+```bash
+# After Stages 0-5 outputs are in place:
+bash   legacy/v7_pipeline_deprecated/launchers/run_contrasts_mean_dropzero.sh
+python legacy/v7_pipeline_deprecated/statistics/findings_v7_mean_dropzero.py
+python legacy/v7_pipeline_deprecated/statistics/export_tier_tables.py
+
+# Tier 0 drilldown
+python legacy/v7_pipeline_deprecated/tier0/tier0_2x2.py
+python legacy/v7_pipeline_deprecated/tier0/bl96_drilldown.py
+python legacy/v7_pipeline_deprecated/tier0/mar10693_vent_check.py
+python legacy/v7_pipeline_deprecated/tier0/robustness.py
+
+# Figures
+python legacy/v7_pipeline_deprecated/figures/figs_easy.py
+python legacy/v7_pipeline_deprecated/figures/condition_axis_curves.py
+
+# Matched-floor F2 resample (needs Grace sampling first; see §11.20)
+bash   v7_analysis/matched_floor/run_pipeline.sh
+python legacy/v7_pipeline_deprecated/statistics/export_tier_tables.py
+```
+
+`v7_final/` is immutable; its `FREEZE.md` carries md5s.
