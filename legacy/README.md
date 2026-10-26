@@ -18,12 +18,12 @@ overpowered. The scripts still work; they just don't appear in the chapter.
 
 | Subdir | What it did | Superseded by |
 |---|---|---|
-| `statistics/` | W1 contrasts (3 normaliser variants) + family findings | `v8_analysis/scripts/04`, `07` |
-| `figures/` | fig1–5 + figS4/S5 heatmaps / developmental axis | `v8_analysis/scripts/08`, `09` |
+| `statistics/` | W1 contrasts (3 normaliser variants) + family findings | `pipeline/05_chapter/scripts/04`, `07` |
+| `figures/` | fig1–5 + figS4/S5 heatmaps / developmental axis | `pipeline/05_chapter/scripts/08`, `09` |
 | `tier0/` | Parent/child FBA + BL_96 greedy addback + MAR10693 vent | Finding is now carried by §3.1/§3.2 isoleucine topology thread |
 | `positive_control/` | Steroid KO + KD2 positive controls on LD_72 | Chapter does not report positive-control validation |
 | `launchers/` | run_contrasts_*.sh batch drivers for 42 contrasts | Not needed; no W1 contrasts in chapter |
-| `plots/` | KDE / CDF / trajectory alternatives | `v8_analysis/scripts/09` density ridges |
+| `plots/` | KDE / CDF / trajectory alternatives | `pipeline/05_chapter/scripts/09` density ridges |
 
 The frozen Tier A/B/C deliverable from this pipeline is retained at the repo
 root in `v7_final/` — see its `FREEZE.md` for md5s.

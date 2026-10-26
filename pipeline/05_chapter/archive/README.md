@@ -1,15 +1,15 @@
-# v8_analysis archive
+# pipeline/05_chapter archive
 
 104 scripts preserved for provenance. **Not** needed to reproduce the chapter —
-the linear pipeline is `v8_analysis/scripts/01..09`.
+the linear pipeline is `pipeline/05_chapter/scripts/01..09`.
 
 Keep for forensics only. If you need something here, it's probably because you
 want to see how a decision got made, not to run anything.
 
 ## Categories
 
-**Sampling + loop removal (used by Stages 0–5, superseded by `sampling/` and
-`v7_analysis/loop_removal/` in the main repo):**
+**Sampling + loop removal (used by Stages 0–5, superseded by `pipeline/02_sampling/`
+and `pipeline/03_loop_removal/`):**
 `s41d_hopsy_sample_direct.py`, `s41d_aggregate.py`, `s51*_cyclefreeflux*.py`,
 `s52_post_sample_subsets.py`, `s60_split_chain*.py`, `s70_cff_verify.py`
 
@@ -20,8 +20,8 @@ density-plot iterations before `09_density_plots.py`), `s82*_positive_control*.p
 heatmap + condition-axis + developmental-axis figures),
 `two_tier_subsystem_test*.py` (4 variants), `run_contrasts_*.sh` (launchers).
 
-**Tier 0 structural analysis (preserved by CSM main repo at `v7_analysis/tier0/`;
-these are earlier iterations):** `s150_tier0_2x2_v7.py`, `s151_tier0_fixups_bl96.py`,
+**Tier 0 structural analysis (now at `legacy/v7_pipeline_deprecated/tier0/`;
+these were earlier iterations):** `s150_tier0_2x2_v7.py`, `s151_tier0_fixups_bl96.py`,
 `s16{0..9}_*.py`, `s17{0..9}_*.py`, `s179_tables.py`.
 
 **Lipid-relay 2×2 (PARKED, see `PARKED_lipid_relay_state_20261016.md`):**
@@ -36,7 +36,7 @@ these are earlier iterations):** `s150_tier0_2x2_v7.py`, `s151_tier0_fixups_bl96
 `s192_cff_swap_corners.py`, `s193_retry_round_LD120_LD96.py`,
 `s194*.py` (Rhat/ESS checks), `s20b_rank_rhat.py`.
 
-**Pre-reframe chapter figures (replaced by `v8_analysis/scripts/08`/`09`):**
+**Pre-reframe chapter figures (replaced by `pipeline/05_chapter/scripts/08`/`09`):**
 `s200_figures_v7*.py`, `s201_condition_axis_curves.py`,
 `s202_run_matched_f2_pipeline.sh`.
 

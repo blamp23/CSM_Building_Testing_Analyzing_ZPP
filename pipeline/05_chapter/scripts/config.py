@@ -1,5 +1,5 @@
 """
-v8_analysis path config — single source of truth for all 9 chapter scripts.
+Chapter pipeline path config — single source of truth for the 9 chapter scripts.
 
 Repo-internal paths (functions/, data/, chapter_assets/) resolve from __file__.
 External large-data paths (model .mat files, pooled hopsy samples, hpf-matched
@@ -9,7 +9,8 @@ environment variable to point at a different mirror.
 
     export CSM_DATA_ROOT=/path/to/Discrete_Models
 
-Required external artifacts (produced by Stages 0-5 of PIPELINE.md):
+Required external artifacts (produced by pipeline/00_bake, 01_extract, 02_sampling,
+03_loop_removal, 04_matched_floor and the sampling-side pooling step):
     $CSM_DATA_ROOT/reviewer_packet_v4_slim/v7_models/trans_rfastcormics_*.mat
     $CSM_DATA_ROOT/reviewer_packet_v4_slim/s130_v7_ledger.csv
     $CSM_DATA_ROOT/grace_v4/results/pooled_v7/{cell}_pooled.csv
@@ -19,10 +20,12 @@ from pathlib import Path
 import os
 
 # ----- repo-internal (committed) -----
-CSM_ROOT = Path(__file__).resolve().parents[2]
+# This file lives at: pipeline/05_chapter/scripts/config.py
+CSM_ROOT = Path(__file__).resolve().parents[3]
+CHAPTER_HOME = Path(__file__).resolve().parents[1]
 FUNCTIONS = CSM_ROOT / "functions"
 DATA = CSM_ROOT / "data"
-CHAPTER_ASSETS = CSM_ROOT / "v8_analysis" / "chapter_assets"
+CHAPTER_ASSETS = CHAPTER_HOME / "chapter_assets"
 COMPARISON_TABLES = CHAPTER_ASSETS / "comparison_tables"
 TABLES = CHAPTER_ASSETS / "tables"
 FIGURES = CHAPTER_ASSETS / "figures"

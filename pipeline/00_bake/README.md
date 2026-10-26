@@ -1,4 +1,4 @@
-# base_model/
+# pipeline/00_bake/
 
 This folder turns the published Wang zebrafish GEM into the five per-hpf parent models that extraction consumes. The output is `baked_ocr_{24,48,72,96,120}_v7.mat`, each one a self-contained COBRA model with a thermodynamically consistent topology, oxygen bounded by measured respiration, every exchange sitting at a boundary rule written down in `rules/v7_ledger.csv`, and the pool coefficient in biomass set so that cofactors stop acting as a growth ceiling.
 

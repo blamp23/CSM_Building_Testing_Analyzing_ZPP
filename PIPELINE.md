@@ -6,7 +6,7 @@ re-defines prior stages — read `legacy/docs/FAMILY_PREREG.md` for the amendmen
 
 **2026-10-26 reframe:** Stages 6–10 (W1 contrasts → tier export → figures) are
 **superseded** for the chapter. The chapter uses a per-reaction DESeq-style
-framework instead; see Stage 12 and `v8_analysis/`. Stages 0–5 (model + sample
+framework instead; see Stage 12 and `pipeline/05_chapter/`. Stages 0–5 (model + sample
 + loop + pool + subset) are unchanged and feed both pipelines. Stage 11 (F2
 matched-floor resample) also feeds the v8 pipeline. The `v7_final/` deliverable
 is retained as a frozen artifact of the earlier Tier A/B/C analysis.
@@ -25,7 +25,7 @@ Headline funnel: **1,687 rows in family → 146 at q ≤ 0.10 → Tier A 50
 
 ## Stage 0 — base model
 
-`base_model/` + `extraction/`. Wang zebrafish GEM → baked_ocr_{hpf}_v7.mat
+`pipeline/00_bake/` + `pipeline/01_extract/`. Wang zebrafish GEM → baked_ocr_{hpf}_v7.mat
 (5 per-hpf parents, flux bounds + ε = 10⁻³ cofactor pool).
 → rFASTCORMICS extraction → `v7_models/trans_rfastcormics_{cell}.mat`
 (15 context-specific child models). Frozen at tag `v7-frozen`.
@@ -47,7 +47,7 @@ only; not available on Grace venv). Writes
 
 ## Stage 3 — sampling
 
-`v7_analysis/matched_floor/hopsy_sample_direct.py`. hopsy billiard-walk,
+`pipeline/04_matched_floor/hopsy_sample_direct.py`. hopsy billiard-walk,
 4 chains × 500 samples × thinning 300 per cell. Explicit starting-point
 Chebyshev + feasibility shrink (patched 2026-10-12 for D_72). Writes
 `flux_samples_{cell}_ch{N}.csv`.
@@ -57,7 +57,7 @@ floor resample for 9 cells writes to hopsy_v7_matched_f2/ via Grace.)
 
 ## Stage 4 — loop removal
 
-`v7_analysis/loop_removal/cff_gurobi.py`. CycleFreeFlux (Desouki 2015) via
+`pipeline/03_loop_removal/cff_gurobi.py`. CycleFreeFlux (Desouki 2015) via
 Gurobi; warm-starts between consecutive samples. Writes loopless_{cell}_ch{N}.csv.
 
 ## Stage 5 — pooling + enzyme subsets
@@ -126,7 +126,7 @@ Writes `tierA_final.csv`, `tierB_final.csv`, `tierC_final.csv`,
 
 ## Stage 11 — matched-floor F2 resample (§11.20)
 
-`v7_analysis/matched_floor/run_pipeline.sh`. 9 cells × 4 chains sampled on
+`pipeline/04_matched_floor/run_pipeline.sh`. 9 cells × 4 chains sampled on
 Grace (polytope caches built locally; sampler runs CPU-only billiard walk).
 CFF + pool + 6 F2 contrasts locally. Writes
 `stats_v7_matched_f2/{A}_vs_{B}.csv` which `export_tier_tables.py` reads.
@@ -134,7 +134,7 @@ CFF + pool + 6 F2 contrasts locally. Writes
 Verdict: 10 of 22 flagged F2 Tier A rows survive (lipid/eicosanoid family),
 12 demote to Tier C (`floor_artifact`; amino-acid 24→48 rows).
 
-## Stage 12 — chapter analytical reframe (2026-10-26, `v8_analysis/`)
+## Stage 12 — chapter analytical reframe (2026-10-26, `pipeline/05_chapter/`)
 
 **Rationale.** Hopsy samples are correlated draws from one polytope, not
 biological replicates. Per-sample W1 contrasts (Stage 6) and per-reaction
@@ -151,7 +151,7 @@ coherently in direction + magnitude relative to the rest of the model.
 .mat files (Stage 0) for the capacity LPs. The matched-floor F2 pool
 (Stage 11) is implicit in the F2 contrasts.
 
-**Scripts (linear order in `v8_analysis/scripts/`):**
+**Scripts (linear order in `pipeline/05_chapter/scripts/`):**
 
 | # | Script | Produces |
 |---|---|---|
@@ -167,13 +167,13 @@ coherently in direction + magnitude relative to the rest of the model.
 
 Scripts 01, 02, 03, 08 need Gurobi. 04–07, 09 are pandas-only.
 
-**Path configuration.** All 9 scripts import from `v8_analysis/scripts/config.py`.
+**Path configuration.** All 9 scripts import from `pipeline/05_chapter/scripts/config.py`.
 Repo-internal paths resolve from `__file__`; large external data (v7_models,
 pooled_v7, subsets_v7) resolve from `$CSM_DATA_ROOT`, defaulting to the
 author's OneDrive working location. Set the env var to point at a local
 mirror.
 
-**Outputs (committed to git under `v8_analysis/chapter_assets/`):**
+**Outputs (committed to git under `pipeline/05_chapter/chapter_assets/`):**
 `comparison_tables/subsystem_summary_F{1,2}_centered.csv` (§3.1 primary),
 `per_reaction_flux_F{1,2}_centered.csv`, `reaction_inventory_F{1,2}.csv`,
 `pca_cells*.pdf/csv`, `tables/table_{1..6}.csv`, `table_S{1..15}.csv`,
@@ -203,13 +203,13 @@ Two reproduction targets live in this repo. Pick the one you want.
 ```bash
 # Prerequisites: Python 3.13 + pandas, numpy, scipy, matplotlib, scikit-learn,
 # h5py; Gurobi + gurobipy (for scripts 01/02/03/08).
-pip install -r v8_analysis/requirements.txt
+pip install -r pipeline/05_chapter/requirements.txt
 
 # Point at the local mirror of the Stage 0-5 outputs (model .mat files + pooled
 # samples). Default resolves to the author's OneDrive working location.
 export CSM_DATA_ROOT=/path/to/Discrete_Models
 
-cd v8_analysis/scripts
+cd pipeline/05_chapter/scripts
 python 01_substrate_yields.py     # Table S7
 python 02_atp_ceiling_physio.py   # §3.2
 python 03_atp_ceiling_glucose.py  # §3.2 control
@@ -221,7 +221,7 @@ python 08_capacity_figure.py      # §3.3 + 2×2 figure
 python 09_density_plots.py        # §3.1 density ridges
 ```
 
-Outputs land in `v8_analysis/chapter_assets/` (committed) and
+Outputs land in `pipeline/05_chapter/chapter_assets/` (committed) and
 `$CSM_DATA_ROOT/grace_v4/results/{atp_sweep_v7,v7_susceptibility}/`
 (regenerable; stays local).
 
@@ -247,7 +247,7 @@ python legacy/v7_pipeline_deprecated/figures/figs_easy.py
 python legacy/v7_pipeline_deprecated/figures/condition_axis_curves.py
 
 # Matched-floor F2 resample (needs Grace sampling first; see §11.20)
-bash   v7_analysis/matched_floor/run_pipeline.sh
+bash   pipeline/04_matched_floor/run_pipeline.sh
 python legacy/v7_pipeline_deprecated/statistics/export_tier_tables.py
 ```
 
