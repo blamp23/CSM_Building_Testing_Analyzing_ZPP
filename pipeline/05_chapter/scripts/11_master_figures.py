@@ -648,6 +648,49 @@ def _trajectory_panel(ax, subsystem, mat_values_raw, n_reps_subs):
     ax.grid(True, linestyle=":", alpha=0.3)
 
 
+# ---- Per-group trajectory documents (one per thread) ----
+print("[groups'] building per-group trajectory documents")
+
+def _grid_for_n(n):
+    """Pick a sensible (nrows, ncols) grid for n subsystems."""
+    if n <= 2: return (1, n)
+    if n <= 4: return (2, 2)
+    if n == 5: return (2, 3)
+    if n <= 6: return (2, 3)
+    if n <= 9: return (3, 3)
+    return ((n + 3) // 4, 4)
+
+for group_name, members in CHAPTER_THREADS.items():
+    rows = [s for s in members if s in mat.index]
+    if not rows: continue
+    nr, nc = _grid_for_n(len(rows))
+    fig_g, axes_g = plt.subplots(nr, nc, figsize=(nc * 5.0, nr * 3.6),
+                                   sharex=True)
+    axes_g = np.array(axes_g).flatten() if (nr*nc) > 1 else np.array([axes_g])
+    for i, sub in enumerate(rows):
+        _trajectory_panel(axes_g[i], sub, mat.loc[sub], n_reps.loc[sub])
+    # legend in the first empty slot if any
+    for j in range(len(rows), len(axes_g)):
+        axes_g[j].axis("off")
+    if len(rows) < len(axes_g):
+        axes_g[-1].legend(handles=[
+            Line2D([0], [0], color=REGIME_COLORS[r], marker="o", linewidth=1.8,
+                    markersize=8, label=r) for r in REGIMES
+        ] + [Line2D([0], [0], color="black", marker="o", mfc="white",
+                     markersize=8, linewidth=0, label="subsystem absent")],
+             loc="center", fontsize=12, frameon=True, title="Regime")
+    # left-column y-labels
+    for ax_i, ax in enumerate(axes_g[:nr*nc]):
+        if ax_i % nc == 0:
+            ax.set_ylabel("centered log$_2$|flux|", fontsize=11)
+        if ax_i >= (nr - 1) * nc:
+            ax.set_xlabel("hpf", fontsize=11)
+    fig_g.suptitle(f"Figure B′ — {group_name} trajectories",
+                     fontsize=16, weight="bold", y=1.00)
+    fig_g.tight_layout(rect=[0, 0, 1, 0.97])
+    _save(fig_g, OUT_BP, f"B_prime_group_{_group_slug(group_name)}")
+
+
 # ---- B' chapter (14 panels, 3 cols × 5 rows) ----
 print("[B'] building chapter trajectories (14 panels)")
 rows_bp = 5; cols_bp = 3
