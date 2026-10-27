@@ -463,19 +463,26 @@ def _f2_matrices(subs, trans):
 
 
 MAROON = "#800020"
+VMAX_CAP = 3.0  # hard clip on log2FC colormap, both heatmaps and masters
 
 def _draw_facet_heatmaps(fig, axes, matrices, col_labels, panel_titles,
                            row_labels, cbar_label, row_label_fontsize=10,
-                           maroon_box_lw=2.2):
-    """Common imshow + maroon-box significance overlay. Shared colormap across panels."""
-    # unified vmax from all panels
-    all_vals = [m[0].values for m in matrices]
-    finite_maxes = [np.nanmax(np.abs(v)) for v in all_vals
-                    if v.size and np.isfinite(np.nanmax(np.abs(v)))]
-    vmax = max(finite_maxes) if finite_maxes else 1.0
+                           maroon_box_lw=2.2, vmax=VMAX_CAP):
+    """Common imshow + maroon-box significance overlay. Shared colormap across panels.
+    vmax is a hard clip — larger magnitudes still render at the max colour, with
+    the colorbar showing extend arrows so the reader knows values exceed the scale."""
     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
     cmap = plt.cm.RdBu_r
     cmap.set_bad("#e5e5e5")
+    # Check if any value exceeds the cap — report in colorbar as extend arrows
+    all_vals = np.concatenate([m[0].values.ravel() for m in matrices
+                                if m[0].size])
+    extend_min = bool(np.any(all_vals < -vmax))
+    extend_max = bool(np.any(all_vals > vmax))
+    extend = ("both" if (extend_min and extend_max)
+              else "max" if extend_max
+              else "min" if extend_min
+              else "neither")
 
     im = None
     for i, (ax, (val, q, n), title) in enumerate(zip(axes, matrices, panel_titles)):
@@ -501,7 +508,8 @@ def _draw_facet_heatmaps(fig, axes, matrices, col_labels, panel_titles,
         else:
             ax.tick_params(labelleft=False)
 
-    cbar = fig.colorbar(im, ax=axes, pad=0.015, fraction=0.025, shrink=0.9)
+    cbar = fig.colorbar(im, ax=axes, pad=0.015, fraction=0.025, shrink=0.9,
+                         extend=extend)
     cbar.set_label(cbar_label, fontsize=10)
     cbar.ax.tick_params(labelsize=9)
 
