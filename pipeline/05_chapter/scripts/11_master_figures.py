@@ -43,9 +43,9 @@ for d in (OUT_A, OUT_B, OUT_BP):
 # ---------- constants ----------
 REGIMES = ("BL", "D", "LD")
 HPFS = (24, 48, 72, 96, 120)
-REGIME_COLORS = {"BL": "#1976D2", "D": "#555555", "LD": "#F6B52C"}
-REGIME_MARKERS = {"BL": "o", "D": "s", "LD": "D"}
-HPF_SHADE = {24: 0.25, 48: 0.4, 72: 0.55, 96: 0.75, 120: 0.95}  # for PCA
+REGIME_COLORS = {"BL": "#1976D2", "D": "#333333", "LD": "#F6B52C"}
+# PCA uses shape for timepoint, color for condition (per editorial brief).
+HPF_MARKERS = {24: "o", 48: "X", 72: "P", 96: "s", 120: "D"}
 
 # 14 chapter rows in the order they are discussed in §3.1
 CHAPTER_14 = [
@@ -330,7 +330,7 @@ ax_a1.legend(loc="upper left", ncol=1, fontsize=10, frameon=True, bbox_to_anchor
 ax_a1.grid(axis="y", linestyle=":", alpha=0.3)
 ax_a1.set_ylim(bottom=0)
 
-# A2 PCA — manual label offsets to avoid clutter
+# A2 PCA — shape = timepoint, color = condition; manual label offsets to avoid clutter
 PCA_LABEL_OFFSETS = {  # (dx, dy) in points, per cell
     "BL_24": (-18, -8), "D_24": (8, -14), "LD_24": (-14, 10),
     "BL_48": (-18, 8),  "D_48": (10, 8),   "LD_48": (-18, -14),
@@ -339,14 +339,13 @@ PCA_LABEL_OFFSETS = {  # (dx, dy) in points, per cell
     "BL_120": (-24, 2), "D_120": (10, -14),"LD_120": (10, 8),
 }
 for _, r in pca_df.iterrows():
-    ax_a2.scatter(r.PC1, r.PC2, s=160, c=REGIME_COLORS[r.condition],
-                   marker=REGIME_MARKERS[r.condition],
-                   alpha=0.4 + 0.5 * ((HPFS.index(r.hpf)) / (len(HPFS)-1)),
-                   edgecolor="black", linewidth=1.0, zorder=3)
+    ax_a2.scatter(r.PC1, r.PC2, s=200, c=REGIME_COLORS[r.condition],
+                   marker=HPF_MARKERS[r.hpf],
+                   alpha=0.95,
+                   edgecolor="black", linewidth=1.2, zorder=3)
     off = PCA_LABEL_OFFSETS.get(f"{r.condition}_{r.hpf}", (6, 6))
     ax_a2.annotate(f"{r.condition}_{r.hpf}", (r.PC1, r.PC2),
-                    xytext=off, textcoords="offset points", fontsize=9,
-                    weight="bold" if r.hpf == 120 else "normal")
+                    xytext=off, textcoords="offset points", fontsize=9)
 
 ax_a2.axhline(0, color="black", linewidth=0.4, alpha=0.5)
 ax_a2.axvline(0, color="black", linewidth=0.4, alpha=0.5)
@@ -355,17 +354,20 @@ ax_a2.set_ylabel("PC2")
 ax_a2.set_title("A2  Centered PCA (per-cell median flux shift removed)",
                  loc="left", fontsize=15, pad=12, weight="bold")
 
-# A2 legend: regime shape + hpf shade intensity
-leg_regime = [Line2D([0],[0], marker=REGIME_MARKERS[r], color="w",
-                      markerfacecolor=REGIME_COLORS[r], markersize=12,
-                      label=r, markeredgecolor="black") for r in REGIMES]
-leg_hpf    = [Line2D([0],[0], marker="o", color="w",
-                      markerfacecolor="#555555",
-                      alpha=0.3 + 0.6*(i/(len(HPFS)-1)),
-                      markersize=12, label=f"{h} hpf",
-                      markeredgecolor="black") for i, h in enumerate(HPFS)]
-ax_a2.legend(handles=leg_regime + leg_hpf, loc="upper left",
-              ncol=2, fontsize=9, frameon=True, bbox_to_anchor=(0.02, 0.98))
+# A2 legend: color = condition, shape = timepoint. Placed outside the axes.
+leg_condition = [Line2D([0],[0], marker="o", color="w",
+                         markerfacecolor=REGIME_COLORS[r], markersize=12,
+                         label=r, markeredgecolor="black") for r in REGIMES]
+leg_hpf = [Line2D([0],[0], marker=HPF_MARKERS[h], color="w",
+                   markerfacecolor="#888888", markersize=12,
+                   label=f"{h} hpf", markeredgecolor="black") for h in HPFS]
+leg1 = ax_a2.legend(handles=leg_condition, loc="upper left",
+                     bbox_to_anchor=(1.02, 1.0), fontsize=10,
+                     frameon=True, title="Condition (colour)", title_fontsize=11)
+leg2 = ax_a2.legend(handles=leg_hpf, loc="upper left",
+                     bbox_to_anchor=(1.02, 0.70), fontsize=10,
+                     frameon=True, title="Timepoint (shape)", title_fontsize=11)
+ax_a2.add_artist(leg1)
 ax_a2.grid(True, linestyle=":", alpha=0.3)
 
 fig_a.suptitle("Figure A — Where the models differ",
