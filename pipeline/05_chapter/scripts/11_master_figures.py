@@ -376,203 +376,254 @@ _save(fig_a, OUT_A, "A_where_models_differ")
 
 
 # ============================================================
-# FIGURE B — findings heatmap (chapter) + SB master
+# PER-CELL MATRIX (used by trajectories — kept for Figure B')
 # ============================================================
-print("\n[B] computing per-cell per-subsystem centered log flux matrix")
+print("\n[per-cell matrix] computing for B' trajectories")
 
 # Melt per_reaction_flux into (cell, rxn, subsystem, mean_nz, median_log2)
-# Each (cell, rxn) appears in 2 F1 contrasts; take first.
 a = f1[["cell_A", "rxn_id", "subsystem", "mean_nz_A", "median_log2_A", "loop_flagged"]].rename(
     columns={"cell_A": "cell", "mean_nz_A": "mean_nz", "median_log2_A": "median_log2"})
 b = f1[["cell_B", "rxn_id", "subsystem", "mean_nz_B", "median_log2_B", "loop_flagged"]].rename(
     columns={"cell_B": "cell", "mean_nz_B": "mean_nz", "median_log2_B": "median_log2"})
 long = pd.concat([a, b]).drop_duplicates(subset=["cell", "rxn_id"]).reset_index(drop=True)
-# drop loop-flagged, drop zero-flux
 long = long[(~long.loop_flagged) & (long.mean_nz > 1e-10)].copy()
 long["centered_log2"] = np.log2(long["mean_nz"]) - long["median_log2"]
 
-# subsystem × cell matrix of mean centered log flux (stage-grouped column order)
+# subsystem × cell matrix of mean centered log flux (used by trajectories)
 mat = (long.groupby(["subsystem", "cell"])
             .centered_log2.mean()
             .unstack("cell")
             .reindex(columns=list(CELLS_DISPLAY)))
-print(f"[B] subsystem×cell matrix: {mat.shape}")
-
-# count representatives per cell per subsystem (for the "absent → grey" mask)
 n_reps = (long.groupby(["subsystem", "cell"])
                .rxn_id.nunique()
                .unstack("cell")
                .reindex(columns=list(CELLS_DISPLAY))
                .fillna(0))
 
-# Qualifying filter: subsystem must have ≥ 5 reps in at least one cell
-qual_subs = n_reps[(n_reps >= 5).any(axis=1)].index.tolist()
-print(f"[B] subsystems qualifying (≥5 reps in ≥1 cell): {len(qual_subs)}")
-
-mat_q = mat.loc[qual_subs].copy()
-n_reps_q = n_reps.loc[qual_subs]
-
-# row z-score (ignoring NaNs). if row has zero variance → leave as-is.
-row_mean = mat_q.mean(axis=1)
-row_std = mat_q.std(axis=1).replace(0, np.nan)
-mat_z = mat_q.sub(row_mean, axis=0).div(row_std, axis=0)
-
-# order rows by class, then by hpf of peak abs(z)
-peak_hpf = mat_z.abs().idxmax(axis=1).map(lambda c: int(c.split("_")[1]) if isinstance(c, str) else 999)
-peak_class = pd.Series({s: classify(s) for s in mat_z.index})
-class_rank = {c: i for i, c in enumerate(CLASS_ORDER)}
-order_df = pd.DataFrame({"subsystem": mat_z.index,
-                          "class": peak_class.values,
-                          "class_rank": peak_class.map(class_rank).values,
-                          "peak_hpf": peak_hpf.values})
-order_df = order_df.sort_values(["class_rank", "peak_hpf", "subsystem"])
-mat_z = mat_z.loc[order_df.subsystem]
-n_reps_q = n_reps_q.loc[order_df.subsystem]
+# Qualifying subsystems: ≥5 reps tested in at least one F1 or F2 contrast
+# (uses the summary tables directly, which is what the heatmaps read from)
+qual_set = set(s1[s1.n_reps_tested >= 5].subsystem.unique()) | \
+           set(s2[s2.n_reps_tested >= 5].subsystem.unique())
+# order qualifying subsystems by class then alphabetical
+qual_subs = sorted(qual_set, key=lambda s: (CLASS_ORDER.index(classify(s)) if classify(s) in CLASS_ORDER else 99, s))
+print(f"[qual] subsystems with ≥5 reps in ≥1 contrast (F1 or F2): {len(qual_subs)}")
 
 
-def _draw_heatmap(ax, data, n_reps_row_subset, row_labels_right=None,
-                   title=None, show_class_bracket=True, bold_rows=None,
-                   fontsize_rows=10):
-    """Draw a heatmap with grey-for-absent cells and class brackets."""
-    # mask: absent cells get grey (no value)
-    absent_mask = (n_reps_row_subset == 0).values
-    display = data.copy().values
-    display[absent_mask] = np.nan
+# ============================================================
+# FIGURE B family — contrast-based facet heatmaps
+#   B_F1_regime_pair_heatmap   : 3 facets (BL vs D | BL vs LD | D vs LD),   chapter 14 rows
+#   B_F2_transition_heatmap    : 4 facets (24→48 | 48→72 | 72→96 | 96→120), chapter 14 rows
+#   SB_F1_regime_pair_heatmap  : same but all qualifying subsystems
+#   SB_F2_transition_heatmap   : same but all qualifying subsystems
+# Cell value = mean centered log2FC for that (subsystem, contrast). Stars mark q.
+# ============================================================
 
-    vmax = np.nanmax(np.abs(display))
+# parse contrast strings
+def _parse_f1(c):
+    m = re.match(r"([A-Z]+)_(\d+)_vs_([A-Z]+)_\d+", c)
+    return (m.group(1), m.group(3), int(m.group(2))) if m else (None, None, None)
+
+def _parse_f2(c):
+    m = re.match(r"([A-Z]+)_(\d+)_vs_[A-Z]+_(\d+)", c)
+    return (m.group(1), int(m.group(2)), int(m.group(3))) if m else (None, None, None)
+
+s1[["pair_a", "pair_b", "hpf"]] = s1.contrast.apply(lambda c: pd.Series(_parse_f1(c)))
+s2[["f2_regime", "hpf_a", "hpf_b"]] = s2.contrast.apply(lambda c: pd.Series(_parse_f2(c)))
+s2["hpf_a"] = s2.hpf_a.astype(int); s2["hpf_b"] = s2.hpf_b.astype(int)
+s1["hpf"] = s1.hpf.astype(int)
+
+F1_PAIRS = [("BL", "D"), ("BL", "LD"), ("D", "LD")]
+F2_TRANSITIONS = [(24, 48), (48, 72), (72, 96), (96, 120)]
+
+
+def _f1_matrices(subs, pair):
+    """For a regime pair, return (val, q, n) matrices of shape rows=subs × cols=HPFS."""
+    rA, rB = pair
+    df = s1[(s1.pair_a == rA) & (s1.pair_b == rB)]
+    val = df.pivot_table(index="subsystem", columns="hpf", values="mean_log2FC_centered")
+    q   = df.pivot_table(index="subsystem", columns="hpf", values="enrichment_q")
+    n   = df.pivot_table(index="subsystem", columns="hpf", values="n_reps_tested")
+    return (val.reindex(subs).reindex(columns=list(HPFS)),
+            q.reindex(subs).reindex(columns=list(HPFS)),
+            n.reindex(subs).reindex(columns=list(HPFS)).fillna(0))
+
+
+def _f2_matrices(subs, trans):
+    """For an hpf transition, return (val, q, n) matrices of rows=subs × cols=REGIMES.
+    Sign flipped so positive = rose from earlier to later hpf."""
+    hA, hB = trans
+    df = s2[(s2.hpf_a == hA) & (s2.hpf_b == hB)]
+    val = df.pivot_table(index="subsystem", columns="f2_regime",
+                          values="mean_log2FC_centered") * -1
+    q   = df.pivot_table(index="subsystem", columns="f2_regime", values="enrichment_q")
+    n   = df.pivot_table(index="subsystem", columns="f2_regime", values="n_reps_tested")
+    return (val.reindex(subs).reindex(columns=list(REGIMES)),
+            q.reindex(subs).reindex(columns=list(REGIMES)),
+            n.reindex(subs).reindex(columns=list(REGIMES)).fillna(0))
+
+
+def _draw_facet_heatmaps(fig, axes, matrices, col_labels, panel_titles,
+                           row_labels, cbar_label, row_label_fontsize=10):
+    """Common imshow + star overlay. Shared colormap across panels."""
+    # unified vmax from all panels
+    all_vals = [m[0].values for m in matrices]
+    vmax = max(np.nanmax(np.abs(v)) for v in all_vals if np.isfinite(np.nanmax(np.abs(v))))
     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
     cmap = plt.cm.RdBu_r
-    cmap.set_bad("#dddddd")
+    cmap.set_bad("#e5e5e5")
 
-    im = ax.imshow(display, aspect="auto", cmap=cmap, norm=norm,
-                     interpolation="nearest")
+    im = None
+    for i, (ax, (val, q, n), title) in enumerate(zip(axes, matrices, panel_titles)):
+        display = val.values.astype(float).copy()
+        # grey where n == 0 (subsystem absent from contrast)
+        display[(n == 0).values] = np.nan
+        im = ax.imshow(display, aspect="auto", cmap=cmap, norm=norm,
+                        interpolation="nearest")
+        # q-value stars inside each cell
+        for r_i in range(val.shape[0]):
+            for c_i in range(val.shape[1]):
+                qv = q.iloc[r_i, c_i]
+                if pd.isna(qv): continue
+                if qv < 0.001:
+                    sym = "**"
+                elif qv < 0.05:
+                    sym = "*"
+                else:
+                    continue
+                # choose text color for contrast with cell shade
+                v = display[r_i, c_i]
+                tcol = "white" if (not np.isnan(v) and abs(v) > vmax * 0.5) else "black"
+                ax.text(c_i, r_i, sym, ha="center", va="center",
+                         fontsize=11, color=tcol, weight="bold")
+        ax.set_xticks(range(len(col_labels)))
+        ax.set_xticklabels(col_labels, fontsize=10)
+        ax.set_title(title, fontsize=13, weight="bold", pad=8)
+        ax.set_yticks(range(len(row_labels)))
+        if i == 0:
+            ax.set_yticklabels(row_labels, fontsize=row_label_fontsize)
+        else:
+            ax.tick_params(labelleft=False)
 
-    # x ticks: stage blocks with regime columns (data columns are already stage-grouped)
-    ncols = len(data.columns)
-    ax.set_xticks(range(ncols))
-    labels = []
-    for c in data.columns:
-        reg, hpf = c.split("_")
-        labels.append(f"{reg}\n{hpf}")
-    ax.set_xticklabels(labels, fontsize=9)
-    # stage block separators (every 3 cols — one per hpf block)
-    for i in range(1, len(HPFS)):
-        ax.axvline(i*3 - 0.5, color="black", linewidth=1.2)
-    # within-stage separators
-    for i in range(ncols):
-        if i % 3 != 0:
-            ax.axvline(i - 0.5, color="#dddddd", linewidth=0.5)
-
-    # y ticks (subsystem names)
-    ax.set_yticks(range(len(data)))
-    yticklabels = []
-    for s in data.index:
-        n_max = int(n_reps_row_subset.loc[s].max())
-        yticklabels.append(f"{s}  (n={n_max})")
-    ax.set_yticklabels(yticklabels, fontsize=fontsize_rows)
-    # emphasise chapter rows if bold_rows given
-    if bold_rows:
-        for lab in ax.get_yticklabels():
-            txt = lab.get_text().split("  (n=")[0]
-            if txt in bold_rows:
-                lab.set_weight("bold")
-
-    ax.set_xlabel("Cell  (regime over hpf)")
-    if title:
-        ax.set_title(title, loc="left", fontsize=15, weight="bold", pad=10)
-    cbar = plt.colorbar(im, ax=ax, pad=0.015, fraction=0.025, shrink=0.9)
-    cbar.set_label("Row z-score of mean centered log$_2$|flux|", fontsize=10)
+    # shared colorbar on the right
+    cbar = fig.colorbar(im, ax=axes, pad=0.015, fraction=0.025, shrink=0.9)
+    cbar.set_label(cbar_label, fontsize=10)
     cbar.ax.tick_params(labelsize=9)
-    return im
 
 
-def _overlay_markers(ax, data, s1_df, s2_df):
-    """Dots for F1 q<0.05 between regime cols; arrows for F2 q<0.05 between stage blocks."""
-    cell_to_idx = {c: i for i, c in enumerate(data.columns)}
-    row_to_idx = {s: i for i, s in enumerate(data.index)}
-
-    # F1: dot between the two regime cols at that stage, in that row
-    sig_f1 = s1_df[(s1_df.enrichment_q < 0.05) & (s1_df.n_reps_tested >= 5)]
-    for _, r in sig_f1.iterrows():
-        if r.subsystem not in row_to_idx: continue
-        y = row_to_idx[r.subsystem]
-        if r.cell_A not in cell_to_idx or r.cell_B not in cell_to_idx: continue
-        xa = cell_to_idx[r.cell_A]; xb = cell_to_idx[r.cell_B]
-        xm = (xa + xb) / 2
-        ax.plot(xm, y, "o", color="black", markersize=4, markeredgecolor="white",
-                markeredgewidth=0.8, zorder=10)
-
-    # F2: arrow at the stage boundary, in the regime's row position
-    sig_f2 = s2_df[(s2_df.enrichment_q < 0.05) & (s2_df.n_reps_tested >= 5)]
-    for _, r in sig_f2.iterrows():
-        if r.subsystem not in row_to_idx: continue
-        y = row_to_idx[r.subsystem]
-        if r.cell_A not in cell_to_idx or r.cell_B not in cell_to_idx: continue
-        xa = cell_to_idx[r.cell_A]; xb = cell_to_idx[r.cell_B]
-        # arrow direction: horizontal, pointing from earlier to later stage block
-        xm = (xa + xb) / 2
-        dx = (xb - xa) * 0.18
-        ax.annotate("", xy=(xm + dx, y - 0.25), xytext=(xm - dx, y - 0.25),
-                    arrowprops=dict(arrowstyle="->", color="black",
-                                     lw=0.8, shrinkA=0, shrinkB=0), zorder=10)
+def _row_labels_with_n(subs, source):
+    """subsystem (n=max tested)."""
+    labels = []
+    for s in subs:
+        n = int(source[source.subsystem == s].n_reps_tested.max()) if (source.subsystem == s).any() else 0
+        labels.append(f"{s}  (n={n})")
+    return labels
 
 
-# ---- SB master ----
-print(f"[SB] building master heatmap ({len(mat_z)} subsystems)")
-fig_sb, ax_sb = plt.subplots(figsize=(14, max(10, len(mat_z) * 0.14)))
-_draw_heatmap(ax_sb, mat_z, n_reps_q, bold_rows=set(CHAPTER_14),
-               title="Supplementary Figure SB — every qualifying subsystem (≥5 reps in ≥1 cell)",
-               fontsize_rows=7.5)
-_overlay_markers(ax_sb, mat_z, s1, s2)
-# legend
-ax_sb.text(0.01, 1.02,
-            "F1 q<0.05 (dot between the two regime columns)   ·   F2 q<0.05 (arrow between stage blocks, in the regime's row)   ·   Chapter rows in bold   ·   Grey = subsystem absent from that cell",
-            transform=ax_sb.transAxes, fontsize=8, color="#555555")
-fig_sb.tight_layout()
-_save(fig_sb, OUT_B, "SB_all_subsystems_heatmap")
+# ---- SB-F1 master (all qualifying subsystems × 3 regime pairs) ----
+print(f"[SB-F1] building master heatmap, {len(qual_subs)} subsystems × 3 regime pairs")
+mats = [_f1_matrices(qual_subs, p) for p in F1_PAIRS]
+titles = [f"{a} vs {b}" for a, b in F1_PAIRS]
+fig_h, axes_h = plt.subplots(1, 3, figsize=(16, max(10, len(qual_subs) * 0.14)),
+                               sharey=True, gridspec_kw={"wspace": 0.05})
+_draw_facet_heatmaps(fig_h, axes_h, mats,
+                      col_labels=[f"{h} hpf" for h in HPFS],
+                      panel_titles=titles,
+                      row_labels=_row_labels_with_n(qual_subs, s1),
+                      cbar_label="mean centered log$_2$FC\n(red = alphabetically earlier regime higher)",
+                      row_label_fontsize=7)
+fig_h.suptitle("Supplementary Figure SB-F1 — F1 enrichments across all qualifying subsystems\n"
+                "Rows: every subsystem with ≥5 reps tested in at least one F1 contrast.   Columns: hpf stage.   "
+                "Each panel is one regime pair.   * = q<0.05   ** = q<0.001   Grey = n<5 reps at that contrast",
+                fontsize=12, weight="bold", y=0.995)
+fig_h.tight_layout(rect=[0, 0, 1, 0.97])
+_save(fig_h, OUT_B, "SB_F1_regime_pair_heatmap")
 
 
-# ---- B chapter: select the 14 rows ----
-# Chapter rows are always included even if they don't meet the SB ≥5-reps gate
-# (Serotonin and melatonin biosynthesis has 4 reps — explicit chapter exception).
-print("[B] selecting 14 chapter rows (always-included for chapter)")
-chapter_rows = []
-for s in CHAPTER_14:
-    if s not in mat.index:
-        print(f"  WARN: chapter subsystem not in data at all: {s}")
-        continue
-    chapter_rows.append(s)
-mat_b_raw = mat.loc[chapter_rows]
-# z-score within each row across the 15 cells
-rm = mat_b_raw.mean(axis=1); rs = mat_b_raw.std(axis=1).replace(0, np.nan)
-mat_b = mat_b_raw.sub(rm, axis=0).div(rs, axis=0)
-n_reps_b = n_reps.loc[chapter_rows]
+# ---- B-F1 chapter (14 rows) ----
+print("[B-F1] chapter 14-row selection")
+chapter_rows_f1 = [s for s in CHAPTER_14 if s in s1.subsystem.values]
+mats = [_f1_matrices(chapter_rows_f1, p) for p in F1_PAIRS]
+fig_h, axes_h = plt.subplots(1, 3, figsize=(14, 7.5), sharey=True,
+                               gridspec_kw={"wspace": 0.05})
+_draw_facet_heatmaps(fig_h, axes_h, mats,
+                      col_labels=[f"{h} hpf" for h in HPFS],
+                      panel_titles=titles,
+                      row_labels=_row_labels_with_n(chapter_rows_f1, s1),
+                      cbar_label="mean centered log$_2$FC\n(red = alphabetically earlier regime higher)",
+                      row_label_fontsize=10)
 
-fig_b, ax_b = plt.subplots(figsize=(14, 7))
-_draw_heatmap(ax_b, mat_b, n_reps_b,
-               title="Figure B — findings heatmap (14 chapter subsystems)",
-               fontsize_rows=11)
-_overlay_markers(ax_b, mat_b, s1, s2)
-
-# thread brackets on the right (positioned outside the colorbar at x=1.14+)
-row_idx = {s: i for i, s in enumerate(mat_b.index)}
+# thread brackets on the right (after the colorbar)
+row_idx = {s: i for i, s in enumerate(chapter_rows_f1)}
 for thread, members in CHAPTER_THREADS.items():
     ids = [row_idx[s] for s in members if s in row_idx]
     if not ids: continue
     y0, y1 = min(ids) - 0.4, max(ids) + 0.4
-    ax_b.annotate("", xy=(1.14, y1), xytext=(1.14, y0),
-                   xycoords=("axes fraction", "data"),
-                   arrowprops=dict(arrowstyle="-", color="black", lw=2),
-                   annotation_clip=False)
-    ax_b.text(1.16, (y0 + y1)/2, thread,
-               transform=ax_b.get_yaxis_transform(),
-               fontsize=10, va="center", rotation=0, clip_on=False)
+    axes_h[-1].annotate("", xy=(1.18, y1), xytext=(1.18, y0),
+                         xycoords=("axes fraction", "data"),
+                         arrowprops=dict(arrowstyle="-", color="black", lw=2),
+                         clip_on=False)
+    axes_h[-1].text(1.21, (y0 + y1)/2, thread,
+                     transform=axes_h[-1].get_yaxis_transform(),
+                     fontsize=9, va="center", rotation=0, clip_on=False)
 
-ax_b.text(0.01, 1.02,
-          "F1 q<0.05 → dot between regime columns   ·   F2 q<0.05 → arrow at stage boundary   ·   Grey = subsystem absent   ·   Values are row-z-scored",
-          transform=ax_b.transAxes, fontsize=9, color="#555555")
-fig_b.tight_layout()
-_save(fig_b, OUT_B, "B_findings_heatmap")
+fig_h.suptitle("Figure B — F1 findings heatmap (14 chapter subsystems × regime pair × hpf)\n"
+                "* = q<0.05   ** = q<0.001   Red = alphabetically earlier regime higher   Grey = subsystem had <5 reps at that contrast",
+                fontsize=14, weight="bold", y=0.995)
+fig_h.tight_layout(rect=[0, 0, 1, 0.94])
+_save(fig_h, OUT_B, "B_F1_regime_pair_heatmap")
+
+
+# ---- SB-F2 master (all qualifying subsystems × 4 transitions) ----
+print(f"[SB-F2] building master, {len(qual_subs)} subsystems × 4 transitions")
+mats = [_f2_matrices(qual_subs, t) for t in F2_TRANSITIONS]
+titles = [f"{a}→{b} hpf" for a, b in F2_TRANSITIONS]
+fig_h, axes_h = plt.subplots(1, 4, figsize=(16, max(10, len(qual_subs) * 0.14)),
+                               sharey=True, gridspec_kw={"wspace": 0.05})
+_draw_facet_heatmaps(fig_h, axes_h, mats,
+                      col_labels=list(REGIMES),
+                      panel_titles=titles,
+                      row_labels=_row_labels_with_n(qual_subs, s2),
+                      cbar_label="mean centered log$_2$FC\n(red = rose from earlier to later hpf)",
+                      row_label_fontsize=7)
+fig_h.suptitle("Supplementary Figure SB-F2 — F2 enrichments across all qualifying subsystems\n"
+                "Rows: every subsystem with ≥5 reps tested in at least one F2 contrast.   Columns: regime.   "
+                "Each panel is one hpf transition.   * = q<0.05   ** = q<0.001   Grey = n<5 reps at that contrast",
+                fontsize=12, weight="bold", y=0.995)
+fig_h.tight_layout(rect=[0, 0, 1, 0.97])
+_save(fig_h, OUT_B, "SB_F2_transition_heatmap")
+
+
+# ---- B-F2 chapter (14 rows) ----
+print("[B-F2] chapter 14-row selection")
+chapter_rows_f2 = [s for s in CHAPTER_14 if s in s2.subsystem.values]
+mats = [_f2_matrices(chapter_rows_f2, t) for t in F2_TRANSITIONS]
+fig_h, axes_h = plt.subplots(1, 4, figsize=(15, 7.5), sharey=True,
+                               gridspec_kw={"wspace": 0.05})
+_draw_facet_heatmaps(fig_h, axes_h, mats,
+                      col_labels=list(REGIMES),
+                      panel_titles=titles,
+                      row_labels=_row_labels_with_n(chapter_rows_f2, s2),
+                      cbar_label="mean centered log$_2$FC\n(red = rose from earlier to later hpf)",
+                      row_label_fontsize=10)
+
+row_idx = {s: i for i, s in enumerate(chapter_rows_f2)}
+for thread, members in CHAPTER_THREADS.items():
+    ids = [row_idx[s] for s in members if s in row_idx]
+    if not ids: continue
+    y0, y1 = min(ids) - 0.4, max(ids) + 0.4
+    axes_h[-1].annotate("", xy=(1.18, y1), xytext=(1.18, y0),
+                         xycoords=("axes fraction", "data"),
+                         arrowprops=dict(arrowstyle="-", color="black", lw=2),
+                         clip_on=False)
+    axes_h[-1].text(1.21, (y0 + y1)/2, thread,
+                     transform=axes_h[-1].get_yaxis_transform(),
+                     fontsize=9, va="center", rotation=0, clip_on=False)
+
+fig_h.suptitle("Figure B2 — F2 findings heatmap (14 chapter subsystems × transition × regime)\n"
+                "* = q<0.05   ** = q<0.001   Red = rose from earlier to later hpf   Grey = subsystem had <5 reps at that contrast",
+                fontsize=14, weight="bold", y=0.995)
+fig_h.tight_layout(rect=[0, 0, 1, 0.94])
+_save(fig_h, OUT_B, "B_F2_transition_heatmap")
 
 
 # ============================================================
@@ -648,7 +699,8 @@ _save(fig_bp, OUT_BP, "B_prime_findings_lines")
 
 # ---- SB' master (all qualifying subsystems) ----
 print(f"[SB'] building master trajectories ({len(qual_subs)} subsystems)")
-subs_sorted = order_df.subsystem.tolist()
+# qual_subs already sorted by class then alphabetical; use that order
+subs_sorted = [s for s in qual_subs if s in mat.index]
 n_sub = len(subs_sorted)
 ncols = 5
 nrows = (n_sub + ncols - 1) // ncols
@@ -657,7 +709,7 @@ fig_sbp, axes_sbp = plt.subplots(nrows, ncols, figsize=(18, nrows * 2.0),
 axes_sbp = np.array(axes_sbp).flatten()
 for i, sub in enumerate(subs_sorted):
     ax = axes_sbp[i]
-    _trajectory_panel(ax, sub, mat_q.loc[sub], n_reps.loc[sub])
+    _trajectory_panel(ax, sub, mat.loc[sub], n_reps.loc[sub])
 for j in range(n_sub, len(axes_sbp)):
     axes_sbp[j].axis("off")
 fig_sbp.suptitle("Supplementary Figure SB′ — trajectories for every qualifying subsystem",
