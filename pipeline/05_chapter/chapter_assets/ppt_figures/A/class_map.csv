@@ -1,0 +1,124 @@
+subsystem,class
+Acyl-CoA hydrolysis,Lipid
+Acylglycerides metabolism,Lipid
+"Alanine, aspartate and glutamate metabolism",Amino acid
+Amino sugar and nucleotide sugar metabolism,Nucleotide
+Aminoacyl-tRNA biosynthesis,Lipid
+Androgen metabolism,Sterol / bile
+Arachidonic acid metabolism,Lipid
+Arginine and proline metabolism,Amino acid
+Ascorbate and aldarate metabolism,Carbohydrate
+Beta oxidation of di-unsaturated fatty acids (n-6) (mitochondrial),Lipid
+Beta oxidation of di-unsaturated fatty acids (n-6) (peroxisomal),Lipid
+Beta oxidation of even-chain fatty acids (mitochondrial),Lipid
+Beta oxidation of even-chain fatty acids (peroxisomal),Lipid
+Beta oxidation of odd-chain fatty acids (mitochondrial),Lipid
+Beta oxidation of phytanic acid (peroxisomal),Lipid
+Beta oxidation of poly-unsaturated fatty acids (mitochondrial),Lipid
+Beta oxidation of unsaturated fatty acids (n-7) (mitochondrial),Lipid
+Beta oxidation of unsaturated fatty acids (n-9) (mitochondrial),Lipid
+Beta oxidation of unsaturated fatty acids (n-9) (peroxisomal),Lipid
+Beta-alanine metabolism,Amino acid
+Bile acid biosynthesis,Sterol / bile
+Bile acid recycling,Sterol / bile
+Biopterin metabolism,Cofactor / vitamin
+Blood group biosynthesis,Carbohydrate
+Butanoate metabolism,Carbohydrate
+C5-branched dibasic acid metabolism,Carbohydrate
+Carnitine shuttle (cytosolic),Lipid
+Carnitine shuttle (endoplasmic reticular),Lipid
+Carnitine shuttle (mitochondrial),Lipid
+Carnitine shuttle (peroxisomal),Lipid
+Cholesterol biosynthesis 1 (Bloch pathway),Sterol / bile
+Cholesterol biosynthesis 2,Sterol / bile
+Cholesterol biosynthesis 3 (Kandustch-Russell pathway),Sterol / bile
+Cholesterol metabolism,Sterol / bile
+Chondroitin / heparan sulfate biosynthesis,Carbohydrate
+Chondroitin sulfate degradation,Carbohydrate
+Cysteine and methionine metabolism,Amino acid
+Drug metabolism,Cofactor / vitamin
+Eicosanoid metabolism,Lipid
+Estrogen metabolism,Sterol / bile
+Ether lipid metabolism,Lipid
+Exchange/demand reactions,Transport / other
+Fatty acid activation (cytosolic),Lipid
+Fatty acid activation (endoplasmic reticular),Lipid
+Fatty acid biosynthesis,Lipid
+Fatty acid biosynthesis (even-chain),Lipid
+Fatty acid biosynthesis (odd-chain),Lipid
+Fatty acid biosynthesis (unsaturated),Lipid
+Fatty acid desaturation (even-chain),Lipid
+Fatty acid desaturation (odd-chain),Lipid
+Fatty acid elongation (even-chain),Lipid
+Fatty acid elongation (odd-chain),Lipid
+Fatty acid oxidation,Lipid
+Folate metabolism,Cofactor / vitamin
+Formation and hydrolysis of cholesterol esters,Sterol / bile
+Fructose and mannose metabolism,Carbohydrate
+Galactose metabolism,Carbohydrate
+Glutathione metabolism,Cofactor / vitamin
+Glycerolipid metabolism,Lipid
+Glycerophospholipid metabolism,Lipid
+"Glycine, serine and threonine metabolism",Amino acid
+Glycolysis / Gluconeogenesis,Carbohydrate
+Glycosphingolipid biosynthesis-ganglio series,Lipid
+Glycosphingolipid biosynthesis-globo series,Lipid
+Glycosphingolipid biosynthesis-lacto and neolacto series,Lipid
+Glycosphingolipid metabolism,Lipid
+Heme degradation,Cofactor / vitamin
+Heparan sulfate degradation,Carbohydrate
+Histidine metabolism,Amino acid
+Hormone biosynthesis,Sterol / bile
+Inositol phosphate metabolism,Carbohydrate
+Isolated,Transport / other
+Keratan sulfate biosynthesis,Carbohydrate
+Keratan sulfate degradation,Carbohydrate
+Leukotriene metabolism,Lipid
+Linoleate metabolism,Lipid
+Lipoic acid metabolism,Lipid
+Lysine metabolism,Amino acid
+Metabolism of other amino acids,Amino acid
+Miscellaneous,Transport / other
+N-glycan metabolism,Carbohydrate
+Nicotinate and nicotinamide metabolism,Cofactor / vitamin
+Nucleotide metabolism,Nucleotide
+O-glycan metabolism,Carbohydrate
+Omega-3 fatty acid metabolism,Lipid
+Omega-6 fatty acid metabolism,Lipid
+Oxidative phosphorylation,Carbohydrate
+Pantothenate and CoA biosynthesis,Cofactor / vitamin
+Pentose and glucuronate interconversions,Carbohydrate
+Pentose phosphate pathway,Carbohydrate
+"Phenylalanine, tyrosine and tryptophan biosynthesis",Amino acid
+Phosphatidylinositol phosphate metabolism,Lipid
+Pool reactions,Transport / other
+Porphyrin metabolism,Cofactor / vitamin
+Propanoate metabolism,Carbohydrate
+Prostaglandin biosynthesis,Lipid
+Protein assembly,Amino acid
+Protein degradation,Amino acid
+Protein modification,Amino acid
+Purine metabolism,Nucleotide
+Pyrimidine metabolism,Nucleotide
+Pyruvate metabolism,Carbohydrate
+ROS detoxification,Cofactor / vitamin
+Retinol metabolism,Cofactor / vitamin
+Riboflavin metabolism,Cofactor / vitamin
+Serotonin and melatonin biosynthesis,Cofactor / vitamin
+Sphingolipid metabolism,Lipid
+Starch and sucrose metabolism,Carbohydrate
+Steroid metabolism,Sterol / bile
+Sulfur metabolism,Cofactor / vitamin
+Terpenoid backbone biosynthesis,Sterol / bile
+Thiamine metabolism,Cofactor / vitamin
+Transport reactions,Transport / other
+Tricarboxylic acid cycle and glyoxylate/dicarboxylate metabolism,Carbohydrate
+Tryptophan metabolism,Amino acid
+Tyrosine metabolism,Amino acid
+Ubiquinone synthesis,Cofactor / vitamin
+"Valine, leucine, and isoleucine metabolism",Amino acid
+Vitamin A metabolism,Cofactor / vitamin
+Vitamin B2 metabolism,Cofactor / vitamin
+Vitamin D metabolism,Sterol / bile
+Vitamin E metabolism,Cofactor / vitamin
+Xenobiotics metabolism,Cofactor / vitamin
