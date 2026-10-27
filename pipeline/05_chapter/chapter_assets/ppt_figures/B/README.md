@@ -1,57 +1,51 @@
-# Figure B family — findings heatmaps
+# Figure B family — findings heatmaps per thread
 
-Four outputs, built by `pipeline/05_chapter/scripts/11_master_figures.py`.
-Two chapter figures (14 subsystems), two supplementary masters (every
-qualifying subsystem). The chapter figures are literal row-selections of
-the masters.
+Seven outputs, built by `pipeline/05_chapter/scripts/11_master_figures.py`.
+Five per-thread chapter documents (one PDF per thread) + two giant
+supplementary masters.
 
-Replaces the earlier per-cell heatmap (removed): that version mixed F1
-and F2 markers in one display and used confusing arrow glyphs. The split
-below mirrors how the chapter itself talks about the findings — one
-section per contrast family.
+Significance: single threshold at **q < 0.05**, marked by a **maroon
+box border** around the cell. No stars, no second threshold. Grey = the
+subsystem had fewer than 5 representatives tested in that contrast
+(test not powered).
 
-## Chapter figures
+## Chapter figures — one per thread
 
-**`B_F1_regime_pair_heatmap.{pdf,png}`** — F1 (light-regime) findings.
-Three facets side-by-side: BL vs D | BL vs LD | D vs LD. Rows =
-chapter-14 subsystems. Columns = 5 hpf stages. Cell value = mean
-centered log₂FC between the two cells for that (subsystem, pair, hpf)
-contrast (positive = alphabetically earlier regime higher). Stars inside
-cells: `*` for q<0.05, `**` for q<0.001. Grey = subsystem had <5
-representatives in that contrast (test not powered).
+Each document contains the subsystems of one thread with both panels:
+- Top: F1 (light regime) — 3 facets side-by-side, cells = regime-pair log₂FC at each hpf
+- Bottom: F2 (hpf transition) — 4 facets side-by-side, cells = transition log₂FC (sign flipped: red = rose)
 
-**`B_F2_transition_heatmap.{pdf,png}`** — F2 (developmental) findings.
-Four facets side-by-side: 24→48 | 48→72 | 72→96 | 96→120 hpf. Rows =
-chapter-14 subsystems. Columns = 3 regimes (BL/D/LD). Cell value =
-mean centered log₂FC with sign flipped so **red = rose from earlier
-to later hpf**. Stars as above.
+| Document | Thread | Subsystems |
+|---|---|---|
+| `B_group_lipid_backbone.{pdf,png}` | Lipid backbone | Leukotriene; Arachidonic acid; Eicosanoid; Fatty acid oxidation; Fatty acid activation (cytosolic) |
+| `B_group_peroxisomal.{pdf,png}` | Peroxisomal | β-oxidation even-chain (peroxisomal); β-oxidation n-9 (peroxisomal) |
+| `B_group_eicosanoid_stall.{pdf,png}` | Eicosanoid stall | Fatty acid desaturation (even-chain); Omega-3 fatty acid metabolism |
+| `B_group_sterol_bile.{pdf,png}` | Sterol & bile | Bile acid biosynthesis; Steroid metabolism |
+| `B_group_signaling_aa.{pdf,png}` | Signaling / AA | Serotonin and melatonin biosynthesis; Phe, Tyr and Trp biosynthesis; Tyrosine metabolism |
 
-## Supplementary masters
+## Supplementary masters — every qualifying subsystem
 
-**`SB_F1_regime_pair_heatmap.{pdf,png}`** — same facet structure as
-Figure B, but every subsystem with ≥5 reps tested in at least one F1
-contrast (~80 subsystems).
-
-**`SB_F2_transition_heatmap.{pdf,png}`** — same facet structure as
-Figure B2, but every subsystem with ≥5 reps tested in at least one F2
-contrast.
+| Document | What |
+|---|---|
+| `SB_F1_regime_pair_heatmap.{pdf,png}` | F1 facets: BL vs D | BL vs LD | D vs LD. Rows = ~80 subsystems with ≥5 reps in ≥1 F1 contrast |
+| `SB_F2_transition_heatmap.{pdf,png}` | F2 facets: 24→48 | 48→72 | 72→96 | 96→120. Rows = same ~80 subsystems |
 
 ## How each finding reads
 
-| Finding | Figure | Facet | Where |
-|---|---|---|---|
-| 1 — shared lipid rise 48→72 | B2 | 48→72 | Leukotriene / Arachidonic / Eicosanoid rows, red ** in BL+D+LD |
-| 2 — BL_48 FA activation | B / B2 | B: BL vs D (48 hpf) red **  ·  B2: 24→48 (D+LD blue **) | |
-| 3 — BL_72 melatonin dip | B | BL vs D (72 hpf) blue * and BL vs LD (72 hpf) blue * | |
-| 4 — LD peroxisomal lead at 72 | B2 | 48→72 and 96→120 (D red ** at 96→120 = D catching up) | |
-| 5 — BL_96 eicosanoid stall | B | BL vs D (72 hpf) FA desaturation blue * | |
-| 6 — LD_120 bile+steroid | B | BL vs LD and D vs LD at 120 hpf, bottom-right ** | |
-| 7 — BL_120 Phe/Tyr/Trp | B | BL vs D (120 hpf) ** on Phe/Tyr/Trp + Tyrosine rows | |
+| Finding | Document | Where |
+|---|---|---|
+| 1 — shared lipid rise 48→72 | `B_group_lipid_backbone` | F2 48→72 panel: maroon boxes on Leukotriene / Arachidonic / Eicosanoid rows across all 3 regimes |
+| 2 — BL_48 FA activation | `B_group_lipid_backbone` | F1 BL vs D & BL vs LD panels (48 hpf) red + maroon on FA activation (cyto) row |
+| 3 — BL_72 melatonin dip | `B_group_signaling_aa` | F1 BL vs D & BL vs LD panels (72 hpf) blue + maroon on Serotonin/melatonin row |
+| 4 — LD peroxisomal lead at 72 | `B_group_peroxisomal` | F1 D vs LD panel (72 hpf) dark blue + maroon on both peroxisomal rows; F2 96→120 D panel maroon (D catches up) |
+| 5 — BL_96 eicosanoid stall | `B_group_eicosanoid_stall` | F1 BL vs D (72 hpf) FA desaturation blue + maroon |
+| 6 — LD_120 bile+steroid | `B_group_sterol_bile` | F1 BL vs LD & D vs LD panels (120 hpf) dark blue + maroon on Bile acid; F2 96→120 LD panel maroon on Steroid |
+| 7 — BL_120 Phe/Tyr/Trp | `B_group_signaling_aa` | F1 BL vs D panel (120 hpf) red + maroon on Phe/Tyr/Trp and Tyrosine rows |
 
 ## Caveat
 
-Row n (max tested across the contrasts shown in that panel) is in the
-row label. A 4-rep subsystem (Serotonin and melatonin biosynthesis)
-sits next to a 165-rep subsystem (Fatty acid oxidation) and the
-colour scale treats them identically. The row n tells the reader the
-power behind each colour.
+Row n (max reps tested across the contrasts shown in that panel) is in
+the row label. A 4-rep subsystem (Serotonin and melatonin biosynthesis)
+sits next to a 165-rep subsystem (Fatty acid oxidation) with the same
+colour scale and the same maroon-box rule. The row n tells the reader
+the power behind each colour.

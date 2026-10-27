@@ -462,12 +462,17 @@ def _f2_matrices(subs, trans):
             n.reindex(subs).reindex(columns=list(REGIMES)).fillna(0))
 
 
+MAROON = "#800020"
+
 def _draw_facet_heatmaps(fig, axes, matrices, col_labels, panel_titles,
-                           row_labels, cbar_label, row_label_fontsize=10):
-    """Common imshow + star overlay. Shared colormap across panels."""
+                           row_labels, cbar_label, row_label_fontsize=10,
+                           maroon_box_lw=2.2):
+    """Common imshow + maroon-box significance overlay. Shared colormap across panels."""
     # unified vmax from all panels
     all_vals = [m[0].values for m in matrices]
-    vmax = max(np.nanmax(np.abs(v)) for v in all_vals if np.isfinite(np.nanmax(np.abs(v))))
+    finite_maxes = [np.nanmax(np.abs(v)) for v in all_vals
+                    if v.size and np.isfinite(np.nanmax(np.abs(v)))]
+    vmax = max(finite_maxes) if finite_maxes else 1.0
     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
     cmap = plt.cm.RdBu_r
     cmap.set_bad("#e5e5e5")
@@ -475,26 +480,18 @@ def _draw_facet_heatmaps(fig, axes, matrices, col_labels, panel_titles,
     im = None
     for i, (ax, (val, q, n), title) in enumerate(zip(axes, matrices, panel_titles)):
         display = val.values.astype(float).copy()
-        # grey where n == 0 (subsystem absent from contrast)
         display[(n == 0).values] = np.nan
         im = ax.imshow(display, aspect="auto", cmap=cmap, norm=norm,
                         interpolation="nearest")
-        # q-value stars inside each cell
+        # maroon rectangle around any cell with q < 0.05
         for r_i in range(val.shape[0]):
             for c_i in range(val.shape[1]):
                 qv = q.iloc[r_i, c_i]
-                if pd.isna(qv): continue
-                if qv < 0.001:
-                    sym = "**"
-                elif qv < 0.05:
-                    sym = "*"
-                else:
-                    continue
-                # choose text color for contrast with cell shade
-                v = display[r_i, c_i]
-                tcol = "white" if (not np.isnan(v) and abs(v) > vmax * 0.5) else "black"
-                ax.text(c_i, r_i, sym, ha="center", va="center",
-                         fontsize=11, color=tcol, weight="bold")
+                if pd.notna(qv) and qv < 0.05:
+                    ax.add_patch(plt.Rectangle(
+                        (c_i - 0.5, r_i - 0.5), 1, 1,
+                        fill=False, edgecolor=MAROON,
+                        linewidth=maroon_box_lw, zorder=10))
         ax.set_xticks(range(len(col_labels)))
         ax.set_xticklabels(col_labels, fontsize=10)
         ax.set_title(title, fontsize=13, weight="bold", pad=8)
@@ -504,7 +501,6 @@ def _draw_facet_heatmaps(fig, axes, matrices, col_labels, panel_titles,
         else:
             ax.tick_params(labelleft=False)
 
-    # shared colorbar on the right
     cbar = fig.colorbar(im, ax=axes, pad=0.015, fraction=0.025, shrink=0.9)
     cbar.set_label(cbar_label, fontsize=10)
     cbar.ax.tick_params(labelsize=9)
@@ -522,108 +518,92 @@ def _row_labels_with_n(subs, source):
 # ---- SB-F1 master (all qualifying subsystems × 3 regime pairs) ----
 print(f"[SB-F1] building master heatmap, {len(qual_subs)} subsystems × 3 regime pairs")
 mats = [_f1_matrices(qual_subs, p) for p in F1_PAIRS]
-titles = [f"{a} vs {b}" for a, b in F1_PAIRS]
+f1_titles = [f"{a} vs {b}" for a, b in F1_PAIRS]
 fig_h, axes_h = plt.subplots(1, 3, figsize=(16, max(10, len(qual_subs) * 0.14)),
                                sharey=True, gridspec_kw={"wspace": 0.05})
 _draw_facet_heatmaps(fig_h, axes_h, mats,
                       col_labels=[f"{h} hpf" for h in HPFS],
-                      panel_titles=titles,
+                      panel_titles=f1_titles,
                       row_labels=_row_labels_with_n(qual_subs, s1),
                       cbar_label="mean centered log$_2$FC\n(red = alphabetically earlier regime higher)",
-                      row_label_fontsize=7)
+                      row_label_fontsize=7, maroon_box_lw=1.3)
 fig_h.suptitle("Supplementary Figure SB-F1 — F1 enrichments across all qualifying subsystems\n"
                 "Rows: every subsystem with ≥5 reps tested in at least one F1 contrast.   Columns: hpf stage.   "
-                "Each panel is one regime pair.   * = q<0.05   ** = q<0.001   Grey = n<5 reps at that contrast",
+                "Each panel is one regime pair.   Maroon box = q<0.05   Grey = n<5 reps at that contrast",
                 fontsize=12, weight="bold", y=0.995)
 fig_h.tight_layout(rect=[0, 0, 1, 0.97])
 _save(fig_h, OUT_B, "SB_F1_regime_pair_heatmap")
 
 
-# ---- B-F1 chapter (14 rows) ----
-print("[B-F1] chapter 14-row selection")
-chapter_rows_f1 = [s for s in CHAPTER_14 if s in s1.subsystem.values]
-mats = [_f1_matrices(chapter_rows_f1, p) for p in F1_PAIRS]
-fig_h, axes_h = plt.subplots(1, 3, figsize=(14, 7.5), sharey=True,
-                               gridspec_kw={"wspace": 0.05})
-_draw_facet_heatmaps(fig_h, axes_h, mats,
-                      col_labels=[f"{h} hpf" for h in HPFS],
-                      panel_titles=titles,
-                      row_labels=_row_labels_with_n(chapter_rows_f1, s1),
-                      cbar_label="mean centered log$_2$FC\n(red = alphabetically earlier regime higher)",
-                      row_label_fontsize=10)
-
-# thread brackets on the right (after the colorbar)
-row_idx = {s: i for i, s in enumerate(chapter_rows_f1)}
-for thread, members in CHAPTER_THREADS.items():
-    ids = [row_idx[s] for s in members if s in row_idx]
-    if not ids: continue
-    y0, y1 = min(ids) - 0.4, max(ids) + 0.4
-    axes_h[-1].annotate("", xy=(1.18, y1), xytext=(1.18, y0),
-                         xycoords=("axes fraction", "data"),
-                         arrowprops=dict(arrowstyle="-", color="black", lw=2),
-                         clip_on=False)
-    axes_h[-1].text(1.21, (y0 + y1)/2, thread,
-                     transform=axes_h[-1].get_yaxis_transform(),
-                     fontsize=9, va="center", rotation=0, clip_on=False)
-
-fig_h.suptitle("Figure B — F1 findings heatmap (14 chapter subsystems × regime pair × hpf)\n"
-                "* = q<0.05   ** = q<0.001   Red = alphabetically earlier regime higher   Grey = subsystem had <5 reps at that contrast",
-                fontsize=14, weight="bold", y=0.995)
-fig_h.tight_layout(rect=[0, 0, 1, 0.94])
-_save(fig_h, OUT_B, "B_F1_regime_pair_heatmap")
-
-
 # ---- SB-F2 master (all qualifying subsystems × 4 transitions) ----
 print(f"[SB-F2] building master, {len(qual_subs)} subsystems × 4 transitions")
 mats = [_f2_matrices(qual_subs, t) for t in F2_TRANSITIONS]
-titles = [f"{a}→{b} hpf" for a, b in F2_TRANSITIONS]
+f2_titles = [f"{a}→{b} hpf" for a, b in F2_TRANSITIONS]
 fig_h, axes_h = plt.subplots(1, 4, figsize=(16, max(10, len(qual_subs) * 0.14)),
                                sharey=True, gridspec_kw={"wspace": 0.05})
 _draw_facet_heatmaps(fig_h, axes_h, mats,
                       col_labels=list(REGIMES),
-                      panel_titles=titles,
+                      panel_titles=f2_titles,
                       row_labels=_row_labels_with_n(qual_subs, s2),
                       cbar_label="mean centered log$_2$FC\n(red = rose from earlier to later hpf)",
-                      row_label_fontsize=7)
+                      row_label_fontsize=7, maroon_box_lw=1.3)
 fig_h.suptitle("Supplementary Figure SB-F2 — F2 enrichments across all qualifying subsystems\n"
                 "Rows: every subsystem with ≥5 reps tested in at least one F2 contrast.   Columns: regime.   "
-                "Each panel is one hpf transition.   * = q<0.05   ** = q<0.001   Grey = n<5 reps at that contrast",
+                "Each panel is one hpf transition.   Maroon box = q<0.05   Grey = n<5 reps at that contrast",
                 fontsize=12, weight="bold", y=0.995)
 fig_h.tight_layout(rect=[0, 0, 1, 0.97])
 _save(fig_h, OUT_B, "SB_F2_transition_heatmap")
 
 
-# ---- B-F2 chapter (14 rows) ----
-print("[B-F2] chapter 14-row selection")
-chapter_rows_f2 = [s for s in CHAPTER_14 if s in s2.subsystem.values]
-mats = [_f2_matrices(chapter_rows_f2, t) for t in F2_TRANSITIONS]
-fig_h, axes_h = plt.subplots(1, 4, figsize=(15, 7.5), sharey=True,
-                               gridspec_kw={"wspace": 0.05})
-_draw_facet_heatmaps(fig_h, axes_h, mats,
-                      col_labels=list(REGIMES),
-                      panel_titles=titles,
-                      row_labels=_row_labels_with_n(chapter_rows_f2, s2),
-                      cbar_label="mean centered log$_2$FC\n(red = rose from earlier to later hpf)",
-                      row_label_fontsize=10)
+# ---- Per-group chapter heatmaps (one PDF per thread) ----
+#   Each document combines F1 (top row, 3 facets) + F2 (bottom row, 4 facets)
+#   for the subsystems in that thread.
+def _group_slug(name):
+    return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
 
-row_idx = {s: i for i, s in enumerate(chapter_rows_f2)}
-for thread, members in CHAPTER_THREADS.items():
-    ids = [row_idx[s] for s in members if s in row_idx]
-    if not ids: continue
-    y0, y1 = min(ids) - 0.4, max(ids) + 0.4
-    axes_h[-1].annotate("", xy=(1.18, y1), xytext=(1.18, y0),
-                         xycoords=("axes fraction", "data"),
-                         arrowprops=dict(arrowstyle="-", color="black", lw=2),
-                         clip_on=False)
-    axes_h[-1].text(1.21, (y0 + y1)/2, thread,
-                     transform=axes_h[-1].get_yaxis_transform(),
-                     fontsize=9, va="center", rotation=0, clip_on=False)
+print("[groups] building per-group F1+F2 heatmap documents")
+for group_name, members in CHAPTER_THREADS.items():
+    rows_in_f1 = [s for s in members if s in s1.subsystem.values]
+    rows_in_f2 = [s for s in members if s in s2.subsystem.values]
+    all_rows = rows_in_f1 or rows_in_f2  # for height sizing
+    n_rows = len(all_rows)
 
-fig_h.suptitle("Figure B2 — F2 findings heatmap (14 chapter subsystems × transition × regime)\n"
-                "* = q<0.05   ** = q<0.001   Red = rose from earlier to later hpf   Grey = subsystem had <5 reps at that contrast",
-                fontsize=14, weight="bold", y=0.995)
-fig_h.tight_layout(rect=[0, 0, 1, 0.94])
-_save(fig_h, OUT_B, "B_F2_transition_heatmap")
+    mats_f1 = [_f1_matrices(rows_in_f1, p) for p in F1_PAIRS]
+    mats_f2 = [_f2_matrices(rows_in_f2, t) for t in F2_TRANSITIONS]
+
+    # figure sized so each row is readable
+    row_h = max(0.55, 1.1 - 0.08 * n_rows)  # taller rows for small groups
+    fig = plt.figure(figsize=(15, max(5, n_rows * row_h * 2 + 3.5)))
+    gs = fig.add_gridspec(2, 1, height_ratios=[1, 1], hspace=0.5,
+                           left=0.26, right=0.90, top=0.90, bottom=0.07)
+    gs_f1 = gs[0].subgridspec(1, 3, wspace=0.05)
+    gs_f2 = gs[1].subgridspec(1, 4, wspace=0.05)
+    axes_f1 = [fig.add_subplot(gs_f1[0, i]) for i in range(3)]
+    axes_f2 = [fig.add_subplot(gs_f2[0, i]) for i in range(4)]
+
+    _draw_facet_heatmaps(fig, axes_f1, mats_f1,
+                           col_labels=[f"{h} hpf" for h in HPFS],
+                           panel_titles=f1_titles,
+                           row_labels=_row_labels_with_n(rows_in_f1, s1),
+                           cbar_label="log$_2$FC\n(red = alph. earlier regime higher)",
+                           row_label_fontsize=10)
+    _draw_facet_heatmaps(fig, axes_f2, mats_f2,
+                           col_labels=list(REGIMES),
+                           panel_titles=f2_titles,
+                           row_labels=_row_labels_with_n(rows_in_f2, s2),
+                           cbar_label="log$_2$FC\n(red = rose from earlier to later hpf)",
+                           row_label_fontsize=10)
+
+    # section labels F1 vs F2
+    axes_f1[0].text(-0.42, 0.5, "F1\n(light regime)", transform=axes_f1[0].transAxes,
+                     fontsize=14, weight="bold", va="center", ha="right", rotation=0)
+    axes_f2[0].text(-0.42, 0.5, "F2\n(hpf transition)", transform=axes_f2[0].transAxes,
+                     fontsize=14, weight="bold", va="center", ha="right", rotation=0)
+
+    fig.suptitle(f"Figure B — {group_name}\n"
+                   f"Maroon box = q < 0.05   ·   Grey = subsystem had <5 reps at that contrast",
+                   fontsize=14, weight="bold", y=0.99)
+    _save(fig, OUT_B, f"B_group_{_group_slug(group_name)}")
 
 
 # ============================================================
