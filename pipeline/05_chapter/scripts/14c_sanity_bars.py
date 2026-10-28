@@ -95,23 +95,42 @@ phys["hpf"] = phys.cell.str.extract(r"_(\d+)$").astype(int)
 phys["condition"] = phys.cell.str.extract(r"^([A-Z]+)_")
 free = phys[phys.regime == "free"]
 
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(11, 6.5))
 for reg in REGIMES:
     sub = free[free.condition == reg].sort_values("hpf")
     ax.plot(sub.hpf, sub.atp_max, "-o", color=REGIME_COLORS[reg],
              label=reg, linewidth=2.8, markersize=12,
              markeredgecolor="white", markeredgewidth=1.4)
+
+# per-stage value labels + spread annotations
+for h in HPFS:
+    stage = free[free.hpf == h].set_index("condition").atp_max.reindex(list(REGIMES))
+    hi, lo = stage.max(), stage.min()
+    spread_pct = 100 * (hi - lo) / stage.mean()
+    # value labels, offset per regime to avoid overlap
+    for i, reg in enumerate(REGIMES):
+        v = stage[reg]
+        dy = {0: 32, 1: -40, 2: 65}[i]  # BL above, D below, LD above-above
+        ax.annotate(f"{v:.0f}", xy=(h, v), xytext=(0, dy),
+                     textcoords="offset points", ha="center", fontsize=9,
+                     color=REGIME_COLORS[reg], weight="bold")
+    # spread beneath x axis
+    ax.text(h, lo - (hi - lo) * 1.3 - 100, f"spread\n{spread_pct:.1f}%",
+             ha="center", fontsize=9, color="#555555")
+
 ax.set_xticks(list(HPFS))
-ax.set_xlabel("hpf")
+ax.set_xlabel("hpf", labelpad=35)
 ax.set_ylabel("ATP maintenance ceiling\n(mmol / gDW / hr)")
-ax.set_title("ATP ceiling rises with the O$_2$ cap", loc="left", fontsize=14, weight="bold")
+ax.set_title("ATP ceiling rises with the O$_2$ cap; cross-regime spread 1-8%",
+              loc="left", fontsize=14, weight="bold")
 ax.legend(title="Regime", loc="upper left", fontsize=11, frameon=True)
 ax.grid(True, linestyle=":", alpha=0.3)
 
 # second axis: OCR cap
 ax2 = ax.twinx()
 ocr_vals = [97, 173, 227, 273, 313]
-ax2.plot(HPFS, ocr_vals, "--", color="#800020", linewidth=1.8, alpha=0.7)
+ax2.plot(HPFS, ocr_vals, "--", color="#800020", linewidth=1.8, alpha=0.7,
+          label="O$_2$ cap")
 ax2.set_ylabel("O$_2$ cap (µmol O$_2$ / gDW / hr)", color="#800020")
 ax2.tick_params(axis="y", colors="#800020")
 ax2.spines["right"].set_visible(True)
