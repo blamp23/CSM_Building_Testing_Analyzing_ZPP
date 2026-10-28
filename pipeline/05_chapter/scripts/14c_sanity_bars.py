@@ -40,9 +40,9 @@ model_order = [f"base_{h}" for h in HPFS] + [f"{r}_{h}" for r in REGIMES for h i
 
 fig, axes = plt.subplots(1, 2, figsize=(16, 5.5))
 
-for ax, substrate, ref in [
-    (axes[0], "glucose", 31.5),
-    (axes[1], "FA 16:0 (palmitate)", None),
+for ax, substrate in [
+    (axes[0], "glucose"),
+    (axes[1], "FA 16:0 (palmitate)"),
 ]:
     # fuzzy-match palmitate in substrate names
     if substrate == "FA 16:0 (palmitate)":
@@ -59,17 +59,11 @@ for ax, substrate, ref in [
             colors.append(REGIME_COLORS[reg])
     x = np.arange(len(model_order))
     bars = ax.bar(x, data.values, color=colors, edgecolor="black", linewidth=0.6)
-    # reference line
-    if ref is not None:
-        ax.axhline(ref, color="#800020", linewidth=1.4, linestyle="--")
-        ax.text(len(x) - 0.5, ref, f"  textbook = {ref}", color="#800020",
-                 fontsize=10, va="center")
-    else:
-        # palmitate: use base_24 value as reference (full base yield)
-        ref_val = data["base_24"] if "base_24" in data.index else data.dropna().iloc[0]
-        ax.axhline(ref_val, color="#800020", linewidth=1.4, linestyle="--")
-        ax.text(len(x) - 0.5, ref_val, f"  base = {ref_val:.1f}",
-                 color="#800020", fontsize=10, va="center")
+    # reference line = base model yield (what we're comparing extracted models against)
+    ref_val = data["base_24"] if "base_24" in data.index else data.dropna().iloc[0]
+    ax.axhline(ref_val, color="#800020", linewidth=1.4, linestyle="--")
+    ax.text(len(x) - 0.5, ref_val, f"  base = {ref_val:.1f}",
+             color="#800020", fontsize=10, va="center")
 
     # label bars with their value above
     for b, v in zip(bars, data.values):
