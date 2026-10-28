@@ -45,6 +45,8 @@ ax.text(123, 5.25, " complete ox (5.25)", color="#800020",
 ax.set_xticks(list(HPFS))
 ax.set_xlabel("hpf")
 ax.set_ylabel("ATP per O$_2$")
+ax.set_title("Oxidative share of ATP grows with development",
+              loc="left", fontsize=14, weight="bold")
 ax.legend(title="Regime", loc="upper right", fontsize=11, frameon=True)
 ax.grid(True, linestyle=":", alpha=0.3)
 
