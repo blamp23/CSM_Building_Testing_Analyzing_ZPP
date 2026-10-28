@@ -37,6 +37,11 @@ STEROL_BILE = [
     "Steroid metabolism",
     "Cholesterol biosynthesis 1 (Bloch pathway)",
 ]
+SHORT_NAMES = {
+    "Bile acid biosynthesis": "Bile acid",
+    "Steroid metabolism": "Steroid",
+    "Cholesterol biosynthesis 1 (Bloch pathway)": "Cholesterol (Bloch)",
+}
 # 9 clock panel genes from §3.4 — LD exceeds both constants by ≥ 0.5 zFPKM
 PANEL_GENES_BLD = ["cry1b", "cry2", "per1a", "per1b", "per3"]        # BL ≤ D < LD
 PANEL_GENES_DBL = ["bhlhe40", "cry1a", "nr1d1", "per2"]              # D < BL < LD
@@ -120,7 +125,7 @@ for ax, (val, q, n), title in zip(axes_6a, mats, pair_titles):
     ax.set_xticks([0]); ax.set_xticklabels(["120 hpf"])
     ax.set_title(title, fontsize=13, weight="bold")
     ax.set_yticks(range(len(STEROL_BILE)))
-    row_labels = [f"{s}\n(n={int(n.loc[s])})" for s in STEROL_BILE]
+    row_labels = [f"{SHORT_NAMES.get(s, s)}\n(n={int(n.loc[s])})" for s in STEROL_BILE]
     if ax is axes_6a[0]:
         ax.set_yticklabels(row_labels, fontsize=11)
     else:
@@ -129,10 +134,12 @@ cbar = fig_6a.colorbar(im, ax=axes_6a, pad=0.015, fraction=0.03, shrink=0.9,
                         extend="both")
 cbar.set_label("mean centered log$_2$FC\n(red = alphabetically earlier regime higher)",
                 fontsize=10)
-fig_6a.suptitle("Figure 6a — Sterol & bile at 120 hpf: LD separates from BL and D\n"
-                 "Maroon box = q < 0.05.   Cholesterol biosynthesis is flat, so the step is downstream of sterol synthesis.",
-                 fontsize=13, weight="bold", y=0.99)
-fig_6a.tight_layout(rect=[0, 0, 1, 0.90])
+fig_6a.suptitle("Figure 6a — Sterol & bile at 120 hpf: LD separates from BL and D",
+                 fontsize=14, weight="bold", y=0.995)
+fig_6a.text(0.5, 0.90,
+             "Maroon box = q < 0.05   ·   Cholesterol is flat, so the step is downstream of sterol synthesis",
+             ha="center", fontsize=10, color="#555555")
+fig_6a.tight_layout(rect=[0, 0, 1, 0.86])
 _save(fig_6a, "6a_sterol_bile_120")
 
 
@@ -272,8 +279,8 @@ for ax, (val, q, n), title in zip(axes_top_l, mats, pair_titles):
     ax.set_title(title, fontsize=12, weight="bold")
     ax.set_yticks(range(len(STEROL_BILE)))
     if ax is axes_top_l[0]:
-        ax.set_yticklabels([f"{s}\n(n={int(n.loc[s])})" for s in STEROL_BILE],
-                            fontsize=10)
+        ax.set_yticklabels([f"{SHORT_NAMES.get(s, s)}\n(n={int(n.loc[s])})"
+                             for s in STEROL_BILE], fontsize=10)
     else:
         ax.tick_params(labelleft=False)
 cbar = fig_6d.colorbar(im1, ax=axes_top_l, pad=0.015, fraction=0.04, shrink=0.9, extend="both")

@@ -37,6 +37,12 @@ MELATONIN = "Serotonin and melatonin biosynthesis"
 AROMATIC = "Phenylalanine, tyrosine and tryptophan biosynthesis"
 TYROSINE = "Tyrosine metabolism"
 
+SHORT_NAMES = {
+    MELATONIN: "Melatonin biosynthesis",
+    AROMATIC: "Phe/Tyr/Trp biosynthesis",
+    TYROSINE: "Tyrosine metabolism",
+}
+
 plt.rcParams.update({
     "font.family": "sans-serif", "font.size": 12,
     "axes.titlesize": 15, "axes.labelsize": 13,
@@ -142,7 +148,7 @@ def _draw_stage_heatmap(ax, val, q, n, title=None, show_ylabels=True):
     ax.set_xticklabels(val.columns, fontsize=10)
     ax.set_yticks(range(len(val.index)))
     if show_ylabels:
-        ax.set_yticklabels([f"{s}\n(n={int(n.iloc[i].max())})"
+        ax.set_yticklabels([f"{SHORT_NAMES.get(s, s)}\n(n={int(n.iloc[i].max())})"
                              for i, s in enumerate(val.index)], fontsize=10)
     else:
         ax.tick_params(labelleft=False)
@@ -157,7 +163,7 @@ def _draw_stage_heatmap(ax, val, q, n, title=None, show_ylabels=True):
 print("\n[3a] melatonin 48-96 window")
 
 fig_3a = plt.figure(figsize=(16, 6))
-gs = fig_3a.add_gridspec(1, 2, width_ratios=[1.4, 1], wspace=0.3)
+gs = fig_3a.add_gridspec(1, 2, width_ratios=[1.3, 1], wspace=0.6)
 ax_traj = fig_3a.add_subplot(gs[0, 0])
 _trajectory(ax_traj, MELATONIN, highlight_bands=[(48, 96)], title=None)
 ax_traj.set_title("Melatonin synthesis trajectory  (n=4)\n"
@@ -192,7 +198,7 @@ _save(fig_3a, "3a_melatonin_window")
 print("\n[7a] aromatic 72 vs 120 flip")
 
 fig_7a = plt.figure(figsize=(16, 6))
-gs = fig_7a.add_gridspec(1, 2, width_ratios=[1.4, 1], wspace=0.3)
+gs = fig_7a.add_gridspec(1, 2, width_ratios=[1.3, 1], wspace=0.6)
 
 # two trajectories stacked on the left
 gs_l = gs[0, 0].subgridspec(2, 1, hspace=0.5)
@@ -230,8 +236,8 @@ _save(fig_7a, "7a_aromatic_flip")
 print("\n[37] combined slide")
 
 fig_37 = plt.figure(figsize=(18, 11))
-gs = fig_37.add_gridspec(2, 2, height_ratios=[1, 1.1], width_ratios=[1.4, 1],
-                           hspace=0.45, wspace=0.3,
+gs = fig_37.add_gridspec(2, 2, height_ratios=[1, 1.1], width_ratios=[1.3, 1],
+                           hspace=0.45, wspace=0.55,
                            left=0.07, right=0.95, top=0.90, bottom=0.07)
 
 # top-left: melatonin trajectory
