@@ -72,58 +72,95 @@ pct["Not notable"] = 100 - pct.sum(axis=1)
 
 labels = [f"{h} hpf" for h in f1_notable.index] + list(f2_notable.index)
 
-# ----- plot -----
-fig, ax = plt.subplots(figsize=(14, 7))
+# ----- plot: broken y-axis (chop out 40-85%) -----
+fig, (ax_top, ax_bot) = plt.subplots(
+    2, 1, figsize=(14, 7), sharex=True,
+    gridspec_kw={"height_ratios": [1, 4], "hspace": 0.05})
+
 f1_x = np.arange(len(f1_notable))
 f2_x = np.arange(len(f2_notable)) + len(f1_notable) + 1
 all_x = np.concatenate([f1_x, f2_x])
 
-# draw notable classes first, then the grey "Not notable" on top
 plot_order = CLASS_ORDER + ["Not notable"]
 plot_colors = {**CLASS_COLORS, "Not notable": "#e8e8e8"}
-bottom = np.zeros(len(pct))
-for cls in plot_order:
-    heights = pct[cls].values
-    ax.bar(all_x, heights, bottom=bottom, color=plot_colors[cls],
-            edgecolor="white", linewidth=0.5, label=cls, width=0.75)
-    for xi, h, b in zip(all_x, heights, bottom):
-        if cls == "Not notable":
-            if h >= 10:
-                ax.text(xi, b + h/2, f"{h:.0f}%", ha="center", va="center",
-                         fontsize=9, color="#555555", weight="normal")
-        else:
-            if h >= 2.5:
-                ax.text(xi, b + h/2, f"{h:.1f}%", ha="center", va="center",
-                         fontsize=9, color="white", weight="bold")
-    bottom += heights
 
-# totals annotation: notable / tested above each bar
+def _stack_bars(ax, show_labels_in_grey=True):
+    bottom = np.zeros(len(pct))
+    for cls in plot_order:
+        heights = pct[cls].values
+        bars = ax.bar(all_x, heights, bottom=bottom, color=plot_colors[cls],
+                      edgecolor="white", linewidth=0.5, label=cls, width=0.75)
+        for xi, h, b in zip(all_x, heights, bottom):
+            cx = xi; cy = b + h/2
+            if cls == "Not notable":
+                if show_labels_in_grey and h >= 10 and cy >= 85:
+                    ax.text(cx, cy, f"{h:.0f}%", ha="center", va="center",
+                             fontsize=9, color="#555555")
+            else:
+                if h >= 2.5:
+                    ax.text(cx, cy, f"{h:.1f}%", ha="center", va="center",
+                             fontsize=9, color="white", weight="bold")
+        bottom += heights
+
+_stack_bars(ax_top, show_labels_in_grey=True)
+_stack_bars(ax_bot, show_labels_in_grey=False)
+
+# totals annotation on the TOP axis only (above the 100% level)
 for xi, lbl in zip(all_x, labels):
-    n_notable = int(notable_df.loc[lbl].sum()) if lbl in notable_df.index else int(
-        notable_df.iloc[list(labels).index(lbl)].sum())
+    n_notable = int(notable_df.iloc[list(labels).index(lbl)].sum())
     n_tested = int(tested_s.iloc[list(labels).index(lbl)])
-    ax.text(xi, 102, f"{n_notable}/{n_tested}", ha="center", fontsize=9, color="#333333")
+    ax_top.text(xi, 102, f"{n_notable}/{n_tested}", ha="center",
+                 fontsize=9, color="#333333")
 
-ax.set_xticks(all_x)
-ax.set_xticklabels(labels, fontsize=11)
-ax.axvline((f1_x[-1] + f2_x[0]) / 2, color="#aaaaaa", linestyle="--", alpha=0.6)
-ax.text(f1_x.mean(), -8, "F1 — cross-regime at each stage\n(pooled over 3 contrasts)",
-         ha="center", fontsize=11, color="#333333")
-ax.text(f2_x.mean(), -8, "F2 — adjacent-stage within regime\n(pooled over 3 regimes)",
-         ha="center", fontsize=11, color="#333333")
+# y-limits: top shows 85-105, bottom shows 0-35
+ax_top.set_ylim(85, 105)
+ax_bot.set_ylim(0, 35)
+ax_top.set_yticks([90, 100])
+ax_top.set_yticklabels(["90%", "100%"])
+ax_bot.set_yticks([0, 10, 20, 30])
+ax_bot.set_yticklabels(["0%", "10%", "20%", "30%"])
 
-ax.set_ylim(0, 108)
-ax.set_yticks([0, 20, 40, 60, 80, 100])
-ax.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
-ax.set_ylabel("Share of total tested representatives\n(notable split by metabolic class)")
-ax.set_title("A1  Where the differences live  (as fraction of all tested representatives)\n"
-              "Top number: notable / tested  ·  Grey = not notable (|centered log$_2$FC| < 1)",
-              loc="left", fontsize=13, weight="bold", pad=12)
-ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=10,
-           frameon=True, title="Class")
-ax.grid(axis="y", linestyle=":", alpha=0.3)
+# hide shared spines + draw diagonal break marks
+ax_top.spines["bottom"].set_visible(False)
+ax_bot.spines["top"].set_visible(False)
+ax_top.tick_params(labelbottom=False, bottom=False)
 
-fig.tight_layout()
+d = 0.012  # diagonal size
+kwargs = dict(transform=ax_top.transAxes, color="k", clip_on=False,
+               linewidth=1.2)
+ax_top.plot((-d, +d), (-d*4, +d*4), **kwargs)
+ax_top.plot((1 - d, 1 + d), (-d*4, +d*4), **kwargs)
+kwargs.update(transform=ax_bot.transAxes)
+ax_bot.plot((-d, +d), (1 - d, 1 + d), **kwargs)
+ax_bot.plot((1 - d, 1 + d), (1 - d, 1 + d), **kwargs)
+
+# x-ticks + dividers on bottom
+ax_bot.set_xticks(all_x)
+ax_bot.set_xticklabels(labels, fontsize=11)
+ax_bot.axvline((f1_x[-1] + f2_x[0]) / 2, color="#aaaaaa", linestyle="--", alpha=0.6)
+ax_top.axvline((f1_x[-1] + f2_x[0]) / 2, color="#aaaaaa", linestyle="--", alpha=0.6)
+ax_bot.text(f1_x.mean(), -5.5, "F1 — cross-regime at each stage\n(pooled over 3 contrasts)",
+             ha="center", fontsize=11, color="#333333")
+ax_bot.text(f2_x.mean(), -5.5, "F2 — adjacent-stage within regime\n(pooled over 3 regimes)",
+             ha="center", fontsize=11, color="#333333")
+
+# shared y-label spanning both axes
+fig.text(0.015, 0.5, "Share of total tested representatives\n(notable split by metabolic class)",
+          rotation=90, va="center", ha="center", fontsize=12)
+
+ax_top.grid(axis="y", linestyle=":", alpha=0.3)
+ax_bot.grid(axis="y", linestyle=":", alpha=0.3)
+
+# title on top axis
+ax_top.set_title("A1  Where the differences live  (fraction of all tested representatives)\n"
+                  "Top number = notable / tested   ·   Grey = not notable (|centered log$_2$FC| < 1)   ·   Y-axis break at 35-85%",
+                  loc="left", fontsize=13, weight="bold", pad=10)
+
+# legend on the right side
+ax_top.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=10,
+               frameon=True, title="Class")
+
+fig.tight_layout(rect=[0.03, 0, 1, 1])
 fig.savefig(OUT_A / "A1_relative.pdf")
 fig.savefig(OUT_A / "A1_relative.png", dpi=200)
 plt.close(fig)
