@@ -43,19 +43,10 @@ for reg in REGIMES:
                      ha="center", fontsize=9, color=REGIME_COLORS[reg],
                      weight="bold")
 
-# annotate BL_96 outlier
-bl96 = xeno[xeno.cell == "BL_96"]
-if len(bl96):
-    y = float(bl96.max_X_glucuronide.values[0])
-    ax.annotate("BL_96 — lower biomass_max\n→ less growth competes for carbon",
-                 xy=(96, y), xytext=(66, y + 5),
-                 fontsize=10, color="black",
-                 arrowprops=dict(arrowstyle="->", color="black", lw=1))
-
 ax.set_xticks(list(HPFS))
 ax.set_xlabel("hpf")
 ax.set_ylabel("max X clearance via glucuronide route\n(mmol / gDW / hr)")
-ax.set_title("Glucuronide route — rises with developmental OCR; BL_96 outlier",
+ax.set_title("Glucuronide route — rises with developmental OCR",
               loc="left", fontsize=14, weight="bold")
 ax.legend(title="Regime", loc="upper left", fontsize=11, frameon=True)
 ax.grid(True, linestyle=":", alpha=0.3)
